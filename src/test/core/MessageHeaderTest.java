@@ -14,15 +14,17 @@ public class MessageHeaderTest {
     @Test
     public void MessageValidTest() {
         MessageHeader mhdr = new MessageHeader("tx", 10);
-        assertTrue(mhdr.isValid());
+        assertTrue(mhdr.valid());
+        mhdr.setMessageStart(new byte[]{0x78, 0x65, 0x43, 0x21});
+        assertFalse(mhdr.valid());
         mhdr = new MessageHeader("tx\0a", 10);
-        assertFalse(mhdr.isValid());
+        assertFalse(mhdr.valid());
         mhdr = new MessageHeader("tx\1", 10);
-        assertFalse(mhdr.isValid());
+        assertFalse(mhdr.valid());
         mhdr = new MessageHeader("tx", -1);
-        assertFalse(mhdr.isValid());
+        assertFalse(mhdr.valid());
         mhdr = new MessageHeader("tx", 0x02000001);
-        assertFalse(mhdr.isValid());
+        assertFalse(mhdr.valid());
     }
 
     @Test

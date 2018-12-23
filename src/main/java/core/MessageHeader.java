@@ -32,27 +32,37 @@ public class MessageHeader implements Serializable {
     protected byte[] messageStart;
     protected byte[] command;
     protected int messageSize;
-    protected int checkSum;
+    protected int checksum;
 
     public MessageHeader() {
         this.messageStart = Arrays.copyOf(MESSAGE_START, MESSAGE_START_SIZE);
         this.command = null;
         this.messageSize = -1;
-        this.checkSum = 0;
+        this.checksum = 0;
     }
 
     public MessageHeader(String command, int messageSize) {
         this.messageStart = Arrays.copyOf(MESSAGE_START, MESSAGE_START_SIZE);
         this.command = Arrays.copyOf(command.getBytes(), COMMAND_SIZE);
         this.messageSize = messageSize;
-        this.checkSum = 0;
+        this.checksum = 0;
+    }
+
+    /** for test */
+    public void setChecksum(int checksum) {
+        this.checksum = checksum;
+    }
+
+    /** for test */
+    public void setMessageStart(byte[] messageStart) {
+        this.messageStart = messageStart;
     }
 
     public String getCommand() {
         return new String(command).replaceAll("\0", ""); // delete unused 0 in the end
     }
 
-    public boolean isValid() {
+    public boolean valid() {
         /** check start bytes */
         if (!Arrays.equals(messageStart, MESSAGE_START)) {
             logger.error("Message start unmatched!");
