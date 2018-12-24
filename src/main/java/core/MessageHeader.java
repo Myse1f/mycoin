@@ -28,6 +28,16 @@ public class MessageHeader implements Serializable {
     public static final int CHECKSUM_SIZE = Integer.BYTES;
     public static final int MAX_MESSAGE_SIZE = 0x02000000;
 
+    /** message type */
+    public static final String VERSION = "version";
+    public static final String VERBACK = "verback";
+    public static final String ADDR = "addr";
+    public static final String INV = "inv";
+    public static final String GETDATA = "gettdata";
+    public static final String GETBLOCKS = "getblocks";
+    public static final String TX = "tx";
+    public static final String BLOCK = "block";
+
     /** header info */
     protected byte[] messageStart;
     protected byte[] command;
@@ -97,11 +107,12 @@ public class MessageHeader implements Serializable {
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();
-        ret.append("Commamd: ");
+        ret.append("[Commamd: ");
         ret.append(command);
         ret.append('\n');
         ret.append("MessageSize: ");
         ret.append(messageSize);
+        ret.append(']');
         ret.append('\n');
         return ret.toString();
     }

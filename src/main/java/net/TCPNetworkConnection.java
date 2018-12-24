@@ -5,6 +5,7 @@
 package net;
 
 import core.Message;
+import core.MessageHeader;
 import exception.ProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+
+import static core.Utils.*;
 
 /**
  * {@code TCPNetworkConnection} is used for connecting a peer over the stand TCP/IP protocol
@@ -26,6 +31,57 @@ public class TCPNetworkConnection implements NetworkConnection {
     private final PeerAddress peer;
     private final NetworkParameters params;
 
+    /**
+     * Connect to a given IP address and do the version handshake
+     * | version -> |
+     * | <- verback |
+     * | <- version |
+     * | verback -> |
+     * @param peerAddress
+     * @param params
+     * @param connectTimeoutMsec
+     * @throws IOException
+     */
+    public TCPNetworkConnection(PeerAddress peerAddress, NetworkParameters params, int connectTimeoutMsec) throws IOException {
+        this.params = params;
+        this.peer = peerAddress;
+
+        int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : params.port;
+        InetSocketAddress address = new InetSocketAddress(peer.getAddr(), port);
+        socket = new Socket();
+        socket.connect(address, connectTimeoutMsec);
+
+        out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
+
+        // TODO version handshake
+    }
+
+    public TCPNetworkConnection(InetAddress address, NetworkParameters params, int connectTimeoutMsec) throws IOException {
+        this(new PeerAddress(address), params, connectTimeoutMsec);
+    }
+
+    /**
+     * create a version message
+     * @return version message
+     * @throws IOException
+     */
+    private Message ceateVersionMessage() throws IOException {
+        Message versionMessage = new Message(MessageHeader.VERSION, 0, null);
+        byte[] payload = ObjectsToByteArray(); //TODO version message payload
+        versionMessage.setMessageSize(payload.length);
+        versionMessage.setPayload(payload);
+        return versionMessage;
+    }
+
+    /**
+     * create a verback message
+     * @return
+     */
+    private Message createVerbackMessage() {
+
+    }
+
     @Override
     public void shutdown() throws IOException {
         out.close();
@@ -35,6 +91,12 @@ public class TCPNetworkConnection implements NetworkConnection {
         socket.close();
     }
 
+    /**
+     * Read a message from socket input stream
+     * @return
+     * @throws IOException
+     * @throws ProtocolException
+     */
     @Override
     public Message readMessage() throws IOException, ProtocolException {
         Object obj;

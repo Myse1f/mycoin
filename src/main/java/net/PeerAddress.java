@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -30,14 +31,12 @@ public class PeerAddress implements Serializable {
         this.port = port;
     }
 
-    public PeerAddress(byte[] addr, int port) {
-        try {
-            this.addr = InetAddress.getByAddress(addr);
-            this.port = port;
-        } catch (UnknownHostException e) {
-            // impossible
-            throw new RuntimeException(e);
-        }
+    public PeerAddress(InetAddress addr) {
+        this(addr, NetworkParameters.mainNet().port);
+    }
+
+    public PeerAddress(InetSocketAddress addr) {
+        this(addr.getAddress(), addr.getPort());
     }
 
     public InetAddress getAddr() {

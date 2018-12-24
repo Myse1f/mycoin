@@ -23,7 +23,7 @@ public class Message extends MessageHeader {
 
     public Message(String command, int messageSize, byte[] payload) {
         super(command, messageSize);
-        this.payload = Arrays.copyOf(payload, payload.length);
+        this.payload = payload;
         this.checksum = byteArrayToInt(doubleDigest(payload));
     }
 

@@ -7,6 +7,9 @@ package core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -98,5 +101,26 @@ public class Utils {
                 (b[2] & 0xFF) << 8 |
                 (b[1] & 0xFF) << 16 |
                 (b[0] & 0xFF) << 24;
+    }
+
+    /**
+     * Serialize given objects to byte array
+     * @param objects
+     * @return serialized bytes
+     * @throws IOException
+     */
+    public static byte[] ObjectsToByteArray(Object ... objects) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        byte[] ret;
+        for (Object object : objects) {
+            oos.writeObject(object);
+        }
+        oos.flush();
+        ret = bos.toByteArray();
+        oos.close();
+        bos.close();
+
+        return ret;
     }
 }
