@@ -112,4 +112,7 @@ public class MessageHeader implements Serializable {
         System.out.println(a.length());
     }
 
+    public void setMessageSize(int messageSize) {
+        this.messageSize = messageSize;
+    }
 }
