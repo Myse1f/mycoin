@@ -42,7 +42,7 @@ public class TCPNetworkConnection implements NetworkConnection {
      * @param connectTimeoutMsec
      * @throws IOException
      */
-    public TCPNetworkConnection(PeerAddress peerAddress, NetworkParameters params, int connectTimeoutMsec) throws IOException {
+    public TCPNetworkConnection(PeerAddress peerAddress, NetworkParameters params, int connectTimeoutMsec) throws IOException, ProtocolException {
         this.params = params;
         this.peer = peerAddress;
 
@@ -55,6 +55,9 @@ public class TCPNetworkConnection implements NetworkConnection {
         in = new ObjectInputStream(socket.getInputStream());
 
         // TODO version handshake
+        logger.debug("Connecting and handshaking");
+        writeMessage(createVerbackMessage());
+        Message m = readMessage();
     }
 
     public TCPNetworkConnection(InetAddress address, NetworkParameters params, int connectTimeoutMsec) throws IOException {
@@ -79,7 +82,7 @@ public class TCPNetworkConnection implements NetworkConnection {
      * @return
      */
     private Message createVerbackMessage() {
-
+        return new Message(MessageHeader.VERBACK, 0, null);
     }
 
     @Override

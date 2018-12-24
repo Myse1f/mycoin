@@ -24,7 +24,9 @@ public class Message extends MessageHeader {
     public Message(String command, int messageSize, byte[] payload) {
         super(command, messageSize);
         this.payload = payload;
-        this.checksum = byteArrayToInt(doubleDigest(payload));
+        if (payload != null) {
+            this.checksum = byteArrayToInt(doubleDigest(payload));
+        }
     }
 
     public void setPayload(byte[] payload) {
