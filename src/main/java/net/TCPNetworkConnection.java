@@ -60,7 +60,7 @@ public class TCPNetworkConnection implements NetworkConnection {
         Message m = readMessage();
     }
 
-    public TCPNetworkConnection(InetAddress address, NetworkParameters params, int connectTimeoutMsec) throws IOException {
+    public TCPNetworkConnection(InetAddress address, NetworkParameters params, int connectTimeoutMsec) throws IOException, ProtocolException {
         this(new PeerAddress(address), params, connectTimeoutMsec);
     }
 

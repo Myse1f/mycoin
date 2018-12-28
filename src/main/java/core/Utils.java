@@ -123,4 +123,20 @@ public class Utils {
 
         return ret;
     }
+
+    /**
+     * Returns the given byte array hex encoded.
+     * @param bytes the given byte array
+     * @return Hex String
+     */
+    public static String bytesToHexString(byte[] bytes) {
+        StringBuilder buf = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            String s = Integer.toString(0xFF & b, 16);
+            if (s.length() < 2)
+                buf.append('0');
+            buf.append(s);
+        }
+        return buf.toString();
+    }
 }
