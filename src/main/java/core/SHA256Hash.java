@@ -23,7 +23,7 @@ public class SHA256Hash implements Serializable {
     private int hash = -1;
 
     /**
-     * Construct a {@code SHA256Hash} with 32 length bytes array
+     * Construct a {@link SHA256Hash} with 32 length bytes array
      * @param bytes
      */
     public SHA256Hash(byte[] bytes) {
@@ -38,7 +38,7 @@ public class SHA256Hash implements Serializable {
     }
 
     /**
-     * Construct a {@code SHA256Hash} with a hex string (length 64)
+     * Construct a {@link SHA256Hash} with a hex string (length 64)
      * @param hash
      */
     public SHA256Hash(String hash) {

@@ -20,7 +20,7 @@ import java.net.Socket;
 import static core.Utils.*;
 
 /**
- * {@code TCPNetworkConnection} is used for connecting a peer over the stand TCP/IP protocol
+ * {@link TCPNetworkConnection} is used for connecting a peer over the stand TCP/IP protocol
  */
 public class TCPNetworkConnection implements NetworkConnection {
     private static final Logger logger = LoggerFactory.getLogger(TCPNetworkConnection.class);

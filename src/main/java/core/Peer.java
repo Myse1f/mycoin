@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A {@code Peer} handlers the high level communication with other nodes
+ * A {@link Peer} handlers the high level communication with other nodes
  * When connect() successfully, call run() to start message loop
  */
 public class Peer {
@@ -82,6 +82,65 @@ public class Peer {
             throw new PeerException(e);
         } catch (IOException e) {
             throw new PeerException(e);
+        }
+    }
+
+    /**
+     * Runs in the peer network and manage communication with others peers
+     * connect() must be called first
+     */
+    public void run() throws PeerException {
+        if (connection == null) {
+           throw new RuntimeException("Connect() must be called first!");
+        }
+
+        running = true;
+
+        try {
+            while (true) {
+                Message m = connection.readMessage();
+                switch (m.getCommand()) {
+                    // TODO process message
+                    case MessageHeader.INV: break;
+                    case MessageHeader.ADDR: break;
+                    case MessageHeader.BLOCK: break;
+                    case MessageHeader.GETBLOCKS: break;
+                    case MessageHeader.GETDATA: break;
+                    case MessageHeader.TX: break;
+                    default: break;
+                }
+            }
+        } catch (ProtocolException e) {
+            disconnect();
+            throw new PeerException(e);
+        } catch (IOException e) {
+            if (!running) {
+                // This exception was expected because we are tearing down the socket as part of quitting.
+                logger.info("Shutting down peer loop");
+            } else {
+                disconnect();
+                throw new PeerException(e);
+            }
+        } catch (RuntimeException e) {
+            disconnect();
+            logger.error("unexpected exception in peer loop: ", e.getMessage());
+            throw e;
+        }
+
+        disconnect();
+    }
+
+    /**
+     * Stop the peer network and disconnect from remote peer
+     */
+    public void disconnect() {
+        running = false;
+        try {
+            // This is the correct way to stop an IO bound loop
+            if (connection != null)
+                connection.shutdown();
+        } catch (IOException e) {
+            // Don't care about this.
         }
     }
 }
