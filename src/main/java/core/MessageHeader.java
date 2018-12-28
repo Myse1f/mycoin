@@ -108,12 +108,11 @@ public class MessageHeader implements Serializable {
     public String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("[Commamd: ");
-        ret.append(command);
-        ret.append('\n');
+        ret.append(new String(command));
+        ret.append(' ');
         ret.append("MessageSize: ");
         ret.append(messageSize);
         ret.append(']');
-        ret.append('\n');
         return ret.toString();
     }
 

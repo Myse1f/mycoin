@@ -54,13 +54,25 @@ public class TCPNetworkConnection implements NetworkConnection {
         out = new ObjectOutputStream(socket.getOutputStream());
         in = new ObjectInputStream(socket.getInputStream());
 
-        // TODO version handshake
+        //begin handshake
         logger.debug("Connecting and handshaking");
         writeMessage(createVerbackMessage());
-        Message m = readMessage();
+        Message versionMsg = readMessage();
+        if (!versionMsg.getCommand().equals(MessageHeader.VERSION)) {
+            throw new ProtocolException("First message received was not a version message but rather " + versionMsg);
+        }
+        // TODO deal with version message
+        writeMessage(createVerbackMessage());
+        Message verbackMsg = readMessage();
+        if (!verbackMsg.getCommand().equals(MessageHeader.VERBACK)) {
+            throw new ProtocolException("Returned message was not a verback message but rather " + verbackMsg);
+        }
+        // handshake finished
+
+        logger.info("Connect to peer: {}", peerAddress);
     }
 
-    public TCPNetworkConnection(InetAddress address, NetworkParameters params, int connectTimeoutMsec) throws IOException {
+    public TCPNetworkConnection(InetAddress address, NetworkParameters params, int connectTimeoutMsec) throws IOException, ProtocolException {
         this(new PeerAddress(address), params, connectTimeoutMsec);
     }
 
