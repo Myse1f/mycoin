@@ -18,9 +18,9 @@ public class TransactionInput implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(TransactionInput.class);
 
     /** index of previous transaction outpitut */
-    TransactionOutpoint prevout;
+    private TransactionOutpoint prevout;
     /** signature to unlock previous output */
-    SHA256Hash signature;
+    private SHA256Hash signature;
 
     public TransactionInput(TransactionOutpoint prevout, SHA256Hash signature) {
         this.prevout = prevout;
