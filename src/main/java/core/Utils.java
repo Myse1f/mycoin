@@ -7,9 +7,7 @@ package core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -109,7 +107,7 @@ public class Utils {
      * @return serialized bytes
      * @throws IOException
      */
-    public static byte[] ObjectsToByteArray(Object ... objects) throws IOException {
+    public static <T extends Serializable> byte[] objectsToByteArray(T ... objects) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
         byte[] ret;
@@ -122,6 +120,34 @@ public class Utils {
         bos.close();
 
         return ret;
+    }
+
+    /**
+     * get the serialized size of a serializable object
+     * @param obj
+     * @return the serialized size
+     */
+    public static <T extends Serializable> int getObjectSerializedSize(T obj) {
+        int size = 0;
+        DumbOutputStream buf = new DumbOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(buf)) {
+            oos.writeObject(obj);
+            size = buf.count;
+        } catch (IOException e) {
+            logger.error(e.toString());
+        }
+        return size;
+    }
+
+    /**
+     * for counting object size
+     */
+    private static class DumbOutputStream extends OutputStream {
+        int count = 0;
+        @Override
+        public void write(int b) throws IOException {
+            count += b;
+        }
     }
 
     /**

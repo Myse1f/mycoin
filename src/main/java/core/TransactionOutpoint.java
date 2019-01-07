@@ -22,9 +22,22 @@ public class TransactionOutpoint implements Serializable {
     /** the index of output */
     private int n;
 
+    public TransactionOutpoint() {
+        setNull();
+    }
+
     public TransactionOutpoint(SHA256Hash hash, int n) {
         this.hash = hash;
         this.n = n;
+    }
+
+    public void setNull() {
+        hash = SHA256Hash.ZERO_HASH;
+        n = -1;
+    }
+
+    public boolean isNull() {
+        return (hash.equals(SHA256Hash.ZERO_HASH) && n == -1);
     }
 
     public SHA256Hash getHash() {

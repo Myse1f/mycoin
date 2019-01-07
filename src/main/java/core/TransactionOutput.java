@@ -22,9 +22,22 @@ public class TransactionOutput implements Serializable {
     /** the pubkey of receiver */
     private SHA256Hash pubkey;
 
+    public TransactionOutput() {
+        setNull();
+    }
+
     public TransactionOutput(double value, SHA256Hash pubkey) {
         this.value = value;
         this.pubkey = pubkey;
+    }
+
+    public void setNull() {
+        value = -1;
+        pubkey = SHA256Hash.ZERO_HASH;
+    }
+
+    public boolean isNull() {
+        return value == -1;
     }
 
     public SHA256Hash getPubkey() {

@@ -83,7 +83,7 @@ public class TCPNetworkConnection implements NetworkConnection {
      */
     private Message ceateVersionMessage() throws IOException {
         Message versionMessage = new Message(MessageHeader.VERSION, 0, null);
-        byte[] payload = ObjectsToByteArray(); //TODO version message payload
+        byte[] payload = objectsToByteArray(); //TODO version message payload
         versionMessage.setMessageSize(payload.length);
         versionMessage.setPayload(payload);
         return versionMessage;
