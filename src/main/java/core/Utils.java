@@ -65,7 +65,7 @@ public class Utils {
      * @param length2
      * @return hash result
      */
-    public static byte[] doubleDigestTwoBuffer(byte[] input1, int offset1, int length1,
+    public static byte[] doubleDigestTwoBuffers(byte[] input1, int offset1, int length1,
                                                byte[] input2, int offset2, int length2) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

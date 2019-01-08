@@ -27,6 +27,14 @@ public class BlockHeader implements Serializable {
         setNull();
     }
 
+    public BlockHeader(BlockHeader other) {
+        this.hashPrevBlock = other.hashPrevBlock.duplicate();
+        this.hashMerkleRoot = other.hashMerkleRoot.duplicate();
+        this.nTime = other.nTime;
+        this.nNonce = other.nNonce;
+        this.nBits = other.nBits;
+    }
+
     public void setNull() {
         hashPrevBlock = SHA256Hash.ZERO_HASH;
         hashMerkleRoot = SHA256Hash.ZERO_HASH;

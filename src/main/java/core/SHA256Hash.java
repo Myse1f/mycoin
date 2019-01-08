@@ -15,7 +15,7 @@ import java.util.Arrays;
 /**
  * Warp the byte[] to represent uint256 for sha-256 hash
  */
-public class SHA256Hash implements Serializable {
+public final class SHA256Hash implements Serializable {
     private static final long serialVersionUID = -3081155937186535182L;
     private static final int HASHCODE_BYTES_TO_CHECK = 5;
 
