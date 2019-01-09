@@ -70,8 +70,26 @@ public class Block extends BlockHeader {
 
     @Override
     public String toString() {
-        return super.toString();
+        return String.format("Blcck: %s, previous hash: %s, merkle root: %s, nonce: %d", hash.toString(), hashPrevBlock.toString(), hashMerkleRoot.toString(), nNonce);
     }
 
-    // TODO
+    public SHA256Hash getHash() {
+        return hash;
+    }
+
+    public void setHash(SHA256Hash hash) {
+        this.hash = hash;
+    }
+
+    public List<SHA256Hash> getMerkleTree() {
+        return merkleTree;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void addTransaction(Transaction tx) {
+        transactions.add(tx);
+    }
 }

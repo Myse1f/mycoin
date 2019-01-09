@@ -144,9 +144,14 @@ public class Utils {
      */
     private static class DumbOutputStream extends OutputStream {
         int count = 0;
+        /**
+         * the write method write 1 byte into buffer every time, which is the 8 lower bits of b
+         * @param b
+         * @throws IOException
+         */
         @Override
         public void write(int b) throws IOException {
-            count += b;
+            count ++;
         }
     }
 

@@ -4,6 +4,8 @@
  */
 package core;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,5 +56,27 @@ public class TransactionOutput implements Serializable {
 
     public void setValue(double value) {
         this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TransactionOutput that = (TransactionOutput) o;
+
+        return new EqualsBuilder()
+                .append(value, that.value)
+                .append(pubkey, that.pubkey)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(value)
+                .append(pubkey)
+                .toHashCode();
     }
 }

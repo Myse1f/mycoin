@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * A {@link TransactionInput} must be in a transaction
@@ -21,6 +22,11 @@ public class TransactionInput implements Serializable {
     private TransactionOutpoint prevout;
     /** signature to unlock previous output */
     private SHA256Hash signature;
+
+    public TransactionInput() {
+        this.prevout = new TransactionOutpoint();
+        this.signature = SHA256Hash.ZERO_HASH;
+    }
 
     public TransactionInput(TransactionOutpoint prevout, SHA256Hash signature) {
         this.prevout = prevout;
@@ -41,5 +47,27 @@ public class TransactionInput implements Serializable {
 
     public void setSignature(SHA256Hash signature) {
         this.signature = signature;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TransactionInput that = (TransactionInput) o;
+
+        return new org.apache.commons.lang3.builder.EqualsBuilder()
+                .append(prevout, that.prevout)
+                .append(signature, that.signature)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new org.apache.commons.lang3.builder.HashCodeBuilder(17, 37)
+                .append(prevout)
+                .append(signature)
+                .toHashCode();
     }
 }
