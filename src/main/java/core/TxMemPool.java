@@ -4,6 +4,9 @@
  */
 package core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Store transactions in-memory
  * Transaction must be verified first and then add into pool
@@ -12,8 +15,16 @@ package core;
 public class TxMemPool {
     private static final TxMemPool mempool = new TxMemPool();
 
+    private long nTransactionsaUpdated; // increment when mempool update, check for its updated
+    private Map<SHA256Hash, Transaction> mapTx;
+    private Map<TransactionOutpoint, TransactionInput> mapNextTx;
+
     //TODO
-    private TxMemPool() {}
+    private TxMemPool() {
+        nTransactionsaUpdated = 0;
+        mapTx = new HashMap<>();
+        mapNextTx = new HashMap<>();
+    }
 
     public static TxMemPool getInstance() {
         return mempool;
