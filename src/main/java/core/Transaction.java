@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +31,8 @@ public class Transaction implements Serializable {
     transient private SHA256Hash hash;
     //TODO
     public Transaction() {
+        inputs = new ArrayList<>();
+        outputs = new ArrayList<>();
         setNull();
     }
 

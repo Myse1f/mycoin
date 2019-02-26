@@ -4,7 +4,9 @@
  */
 package core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,6 +79,23 @@ public class TxMemPool {
                 }
             }
         }
+    }
+
+    /**
+     * get all transaction hash in the mempool
+     * @return list of tx hash
+     */
+    public synchronized List<SHA256Hash> getAllHash() {
+        return new ArrayList<>(mapTx.keySet());
+    }
+
+    /**
+     * lookup tx with given hash in mempool
+     * @param hash
+     * @return tx if found in pool, or null
+     */
+    public synchronized Transaction lookup(SHA256Hash hash) {
+        return mapTx.getOrDefault(hash, null);
     }
 
     /**
