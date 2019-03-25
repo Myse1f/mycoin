@@ -4,12 +4,18 @@
  */
 package core;
 
+import exception.VerificationException;
+import net.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import static core.Utils.doubleDigest;
 import static core.Utils.doubleDigestTwoBuffers;
 
 /**
@@ -68,12 +74,53 @@ public class Block extends BlockHeader {
         return transactions.get(index).getHash();
     }
 
+    private static BigInteger LARGEST_HASH = BigInteger.ONE.shiftLeft(256);
+
+    /**
+     * Get the total work of the block
+     *
+     * Work is defined as the number of tries needed so a PoW problem in avrage.
+     * It is represented by Reciprocal of probability.
+     * e.g. 1/50 of the hash space to hit need 50 work.
+     * @return work in BigInteger
+     * @throws VerificationException
+     */
+    public BigInteger getWork() throws VerificationException {
+        BigInteger target = getnBitsAsInteger();
+        return LARGEST_HASH.divide(target.add(BigInteger.ONE));
+    }
+
+    public BigInteger getnBitsAsInteger() throws VerificationException {
+        BigInteger target = Utils.decodeCompactBits(nBits);
+        if (target.compareTo(BigInteger.valueOf(0)) <= 0 || target.compareTo(NetworkParameters.getNetworkParameters().proofOfWorkLimit) > 0) {
+            throw new VerificationException("nBits is error: " + target.toString());
+        }
+        return target;
+    }
+
     @Override
     public String toString() {
-        return String.format("Blcck: %s, previous hash: %s, merkle root: %s, nonce: %d", hash.toString(), hashPrevBlock.toString(), hashMerkleRoot.toString(), nNonce);
+        StringBuffer s = new StringBuffer(" block: \n" + "   previous block: "
+                + hashPrevBlock.toString() + "\n"
+                + "   time: [" + nTime + "] " + new Date(nTime * 1000).toString() + "\n"
+                + "   difficulty target (nBits): " + nBits + "\n" + "   nonce: " + nNonce + "\n");
+        if (transactions != null && transactions.size() > 0) {
+            s.append("   with ").append(transactions.size()).append(" transaction(s):\n");
+            for (Transaction tx : transactions) {
+                s.append(tx.toString());
+            }
+        }
+        return s.toString();
     }
 
     public SHA256Hash getHash() {
+        if (hash == null) {
+            try {
+                hash = new SHA256Hash(Utils.reverseBytes(doubleDigest(Utils.objectsToByteArray((BlockHeader)this)));
+            } catch (IOException e) {
+                throw new RuntimeException(e); // impossible
+            }
+        }
         return hash;
     }
 

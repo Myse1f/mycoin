@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -170,4 +171,96 @@ public class Utils {
         }
         return buf.toString();
     }
+
+    public static long readUint32BE(byte[] bytes, int offset) {
+        return ((bytes[offset + 0] & 0xFFL) << 24) |
+                ((bytes[offset + 1] & 0xFFL) << 16) |
+                ((bytes[offset + 2] & 0xFFL) << 8) |
+                ((bytes[offset + 3] & 0xFFL) << 0);
+    }
+
+    /**
+     * MPI encoded numbers are produced by the OpenSSL BN_bn2mpi function. They consist of
+     * a 4 byte big endian length field, followed by the stated number of bytes representing
+     * the number in big endian format (with a sign bit).
+     */
+    public static BigInteger decodeMPI(byte[] mpi) {
+        byte[] buf;
+        int length = (int) readUint32BE(mpi, 0);
+        buf = new byte[length];
+        System.arraycopy(mpi, 4, buf, 0, length);
+
+        if (buf.length == 0)
+            return BigInteger.ZERO;
+        boolean isNegative = (buf[0] & 0x80) == 0x80;
+        if (isNegative)
+            buf[0] &= 0x7f;
+        BigInteger result = new BigInteger(buf);
+        return isNegative ? result.negate() : result;
+    }
+    /**
+     * The representation of nBits uses another home-brew encoding, as a way to represent a large
+     * hash value in only 32 bits.
+     */
+    public static BigInteger decodeCompactBits(long compact) {
+        int size = ((int) (compact >> 24)) & 0xFF;
+        byte[] bytes = new byte[4 + size];
+        bytes[3] = (byte) size;
+        if (size >= 1) bytes[4] = (byte) ((compact >> 16) & 0xFF);
+        if (size >= 2) bytes[5] = (byte) ((compact >> 8) & 0xFF);
+        if (size >= 3) bytes[6] = (byte) ((compact >> 0) & 0xFF);
+        return decodeMPI(bytes);
+    }
+
+    public static void uint32ToByteArrayBE(long val, byte[] out, int offset) {
+        out[offset + 0] = (byte) (0xFF & (val >> 24));
+        out[offset + 1] = (byte) (0xFF & (val >> 16));
+        out[offset + 2] = (byte) (0xFF & (val >> 8));
+        out[offset + 3] = (byte) (0xFF & (val >> 0));
+    }
+
+    /**
+     * MPI encoded numbers are produced by the OpenSSL BN_bn2mpi function. They consist of
+     * a 4 byte big endian length field, followed by the stated number of bytes representing
+     * the number in big endian format (with a sign bit).
+     */
+    public static byte[] encodeMPI(BigInteger value) {
+        if (value.equals(BigInteger.ZERO)) {
+            return new byte[] {0x00, 0x00, 0x00, 0x00};
+        }
+        boolean isNegative = value.compareTo(BigInteger.ZERO) < 0;
+        if (isNegative)
+            value = value.negate();
+        byte[] array = value.toByteArray();
+        int length = array.length;
+        if ((array[0] & 0x80) == 0x80)
+            length++;
+
+        byte[] result = new byte[length + 4];
+        System.arraycopy(array, 0, result, length - array.length + 3, array.length);
+        uint32ToByteArrayBE(length, result, 0);
+        if (isNegative)
+            result[4] |= 0x80;
+        return result;
+
+    }
+
+    public static long encodeCompactBits(BigInteger value) {
+        long result;
+        int size = value.toByteArray().length;
+        if (size <= 3)
+            result = value.longValue() << 8 * (3 - size);
+        else
+            result = value.shiftRight(8 * (size - 3)).longValue();
+        // The 0x00800000 bit denotes the sign.
+        // Thus, if it is already set, divide the mantissa by 256 and increase the exponent.
+        if ((result & 0x00800000L) != 0) {
+            result >>= 8;
+            size++;
+        }
+        result |= size << 24;
+        result |= value.signum() == -1 ? 0x00800000 : 0;
+        return result;
+    }
+
 }

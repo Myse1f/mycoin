@@ -32,7 +32,7 @@ public class PeerAddress implements Serializable {
     }
 
     public PeerAddress(InetAddress addr) {
-        this(addr, NetworkParameters.mainNet().port);
+        this(addr, NetworkParameters.getNetworkParameters().port);
     }
 
     public PeerAddress(InetSocketAddress addr) {

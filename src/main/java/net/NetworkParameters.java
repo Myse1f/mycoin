@@ -5,6 +5,8 @@
 package net;
 
 import core.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -15,6 +17,7 @@ import java.math.BigInteger;
  */
 public class NetworkParameters implements Serializable {
     private static final long serialVersionUID = -7630821239286970631L;
+    private static final Logger logger = LoggerFactory.getLogger(NetworkParameters.class);
 
     /** id of main net */
     public static final String ID_MAINNET = "main";
@@ -34,6 +37,11 @@ public class NetworkParameters implements Serializable {
 
     /** the id of network */
     private String id;
+
+    private static NetworkParameters n = null;
+
+    /** set contructor private for singleton */
+    private NetworkParameters() {}
 
     /**
      * create the genesis block according to network parameters
@@ -57,11 +65,10 @@ public class NetworkParameters implements Serializable {
 
     /**
      * setup the parameters of test net
-     * @param n
      * @return the corresponding network parameters
      */
-    private static NetworkParameters createTestNet(NetworkParameters n) {
-        // TODO
+    private static void createTestNet() {
+        n = new NetworkParameters();
         n.proofOfWorkLimit = new BigInteger("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
         n.port = 23333;
         n.interval = BLOCK_INTERVAL;
@@ -71,28 +78,40 @@ public class NetworkParameters implements Serializable {
         n.genesisBlock.setnBits(0x1d07fff8L);
         n.genesisBlock.setnNonce(0L); // dont care about nonce of genesis block
         n.id = ID_TESTNET;
-
-        return n;
-    }
-
-    public static NetworkParameters testNet() {
-        NetworkParameters n = new NetworkParameters();
-        return createTestNet(n);
     }
 
     /**
      * setup the parameters of main net
-     * @param n
      * @return the corresponding network parameters
      */
-    private static NetworkParameters createMainNet(NetworkParameters n) {
+    private static void createMainNet() {
         // TODO
-        return n;
     }
 
-    public static NetworkParameters mainNet() {
-        NetworkParameters n = new NetworkParameters();
-        return createMainNet(n);
+    /**
+     * set network environment: test or main
+     * must be run at the beginning of program only once
+     */
+    public static void setNetworkParameters(String id) {
+        switch (id) {
+            case ID_TESTNET:
+                createTestNet();
+                break;
+            case ID_MAINNET:
+                createMainNet();
+                break;
+            default:
+                // impossible
+                break;
+        }
+    }
+
+    public static NetworkParameters getNetworkParameters() {
+        if (n == null) {
+            logger.error("setNetworkParameters must be run before!");
+            throw new RuntimeException("unset network!");
+        }
+        return n;
     }
 
     public String getId() {
