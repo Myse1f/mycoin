@@ -22,7 +22,7 @@ public final class SHA256Hash implements Serializable {
     public static final SHA256Hash ZERO_HASH = new SHA256Hash(new byte[32]);
 
     private byte[] bytes;
-    private int hash = -1;
+    private transient int hash = -1;
 
     /**
      * Construct a {@link SHA256Hash} with 32 length bytes array

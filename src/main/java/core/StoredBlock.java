@@ -4,7 +4,9 @@
  */
 package core;
 
+import exception.BlockPersistenceException;
 import exception.VerificationException;
+import persistence.BlockPersistence;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -80,7 +82,7 @@ public class StoredBlock implements Serializable {
      * @param source block persistence source
      * @return previous block's hash or null if not found
      */
-    public StoredBlock getPreviousBlock(BlockPresistence source) {
+    public StoredBlock getPreviousBlock(BlockPersistence source) throws BlockPersistenceException {
         return source.get(block.getHashPrevBlock());
     }
 }

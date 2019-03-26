@@ -12,24 +12,24 @@ import java.io.Serializable;
 /**
  * The header of a block
  */
-public class BlockHeader implements Serializable {
+public class BlockHead implements Serializable {
     private static final long serialVersionUID = 9212934684154939401L;
-    private static final Logger logger = LoggerFactory.getLogger(BlockHeader.class);
+    private static final Logger logger = LoggerFactory.getLogger(BlockHead.class);
 
     protected SHA256Hash hashPrevBlock; // the hash of previous block
-    protected SHA256Hash hashMerkleRoot; // the merkle tree root
+//    protected SHA256Hash hashMerkleRoot; // the merkle tree root
     /** java don't have unsigned int, thus use long */
     protected long nTime; // the time when the block generated
     protected long nBits; // the difficult target
     protected long nNonce; // the random number to proof of work
 
-    public BlockHeader() {
+    public BlockHead() {
         setNull();
     }
 
-    public BlockHeader(BlockHeader other) {
+    public BlockHead(BlockHead other) {
         this.hashPrevBlock = other.hashPrevBlock.duplicate();
-        this.hashMerkleRoot = other.hashMerkleRoot.duplicate();
+//        this.hashMerkleRoot = other.hashMerkleRoot.duplicate();
         this.nTime = other.nTime;
         this.nNonce = other.nNonce;
         this.nBits = other.nBits;
@@ -37,7 +37,7 @@ public class BlockHeader implements Serializable {
 
     public void setNull() {
         hashPrevBlock = SHA256Hash.ZERO_HASH;
-        hashMerkleRoot = SHA256Hash.ZERO_HASH;
+//        hashMerkleRoot = SHA256Hash.ZERO_HASH;
         nTime = 0;
         nNonce = 0;
         nBits = 0;
@@ -55,13 +55,13 @@ public class BlockHeader implements Serializable {
         this.hashPrevBlock = hashPrevBlock;
     }
 
-    public SHA256Hash getHashMerkleRoot() {
-        return hashMerkleRoot;
-    }
+//    public SHA256Hash getHashMerkleRoot() {
+//        return hashMerkleRoot;
+//    }
 
-    public void setHashMerkleRoot(SHA256Hash hashMerkleRoot) {
-        this.hashMerkleRoot = hashMerkleRoot;
-    }
+//    public void setHashMerkleRoot(SHA256Hash hashMerkleRoot) {
+//        this.hashMerkleRoot = hashMerkleRoot;
+//    }
 
     public long getnTime() {
         return nTime;
