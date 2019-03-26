@@ -9,6 +9,7 @@ import core.BlockHead;
 import core.SHA256Hash;
 import core.StoredBlock;
 import exception.BlockPersistenceException;
+import exception.ProtocolException;
 import exception.VerificationException;
 import net.NetworkParameters;
 import org.slf4j.Logger;
@@ -205,21 +206,89 @@ public class DiskBlockPersistence implements BlockPersistence {
 
     @Override
     public synchronized void put(StoredBlock block) throws BlockPersistenceException {
-
+        try {
+            SHA256Hash hash = block.getBlock().getHash();
+            // Append to the end of the file.
+            Record.write(channel, block);
+            blockCache.put(hash, block);
+        } catch (IOException e) {
+            throw new BlockPersistenceException(e);
+        }
     }
 
     @Override
     public synchronized StoredBlock get(SHA256Hash hash) throws BlockPersistenceException {
+        // Check the memory cache first.
+        StoredBlock fromMem = blockCache.get(hash);
+        if (fromMem != null) {
+            return fromMem;
+        }
+        if (notFoundCache.contains(hash)) {
+            return null;
+        }
+
+        try {
+            Record fromDisk = getRecord(hash);
+            StoredBlock block = null;
+            if (fromDisk == null) {
+                notFoundCache.add(hash);
+            } else {
+                block = fromDisk.toStoredBlock();
+                blockCache.put(hash, block);
+            }
+            return block;
+        } catch (IOException e) {
+            throw new BlockPersistenceException(e);
+        }
+    }
+
+    private ByteBuffer buf = ByteBuffer.allocateDirect(Record.SIZE);
+
+    private Record getRecord(SHA256Hash hash) throws IOException {
+        long startPos = channel.position();
+        // Use our own file pointer within the tight loop as updating channel positions is really expensive.
+        long pos = startPos;
+        Record record = new Record();
+        int numMoves = 0;
+        do {
+            if (!record.read(channel, pos, buf))
+                throw new IOException("Failed to read buffer");
+            if (new Block(record.getHead()).getHash().equals(hash)) {
+                // Found it. Update file position for next time.
+                channel.position(pos);
+                return record;
+            }
+            // Did not find it.
+            if (pos == 1 + 32) {
+                // At the start so wrap around to the end.
+                pos = channel.size() - Record.SIZE;
+            } else {
+                // Move backwards.
+                pos = pos - Record.SIZE;
+                assert pos >= 1 + 32 : pos;
+            }
+            numMoves++;
+        } while (pos != startPos);
+        // Was never stored.
+        channel.position(pos);
         return null;
     }
 
     @Override
     public synchronized StoredBlock getChainTip() throws BlockPersistenceException {
-        return null;
+        StoredBlock head = get(chainTip);
+        if (head == null)
+            throw new BlockPersistenceException("Corrupted block store: chain tip not found");
+        return head;
     }
 
     @Override
     public synchronized void setChainTip(StoredBlock block) throws BlockPersistenceException {
-
+        try {
+            this.chainTip = block.getBlock().getHash();
+            channel.write(ByteBuffer.wrap(this.chainTip.getBytes()), 1);
+        } catch (IOException e) {
+            throw new BlockPersistenceException(e);
+        }
     }
 }
