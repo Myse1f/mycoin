@@ -4,9 +4,13 @@
  */
 package core;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -23,8 +27,23 @@ public class BlockHead implements Serializable {
     protected long nBits; // the difficult target
     protected long nNonce; // the random number to proof of work
 
+    /**
+     * hashPrevBlock -- 32 bytes
+     * nTime -- 4 bytes
+     * nBits -- 4 bytes
+     * nNonce -- 4 bytes
+     */
+    public static final int BLOCK_HEAD_SIZE = 44;
+
     public BlockHead() {
         setNull();
+    }
+
+    public BlockHead(SHA256Hash hashPrevBlock, long nTime, long nBits, long nNonce) {
+        this.hashPrevBlock = hashPrevBlock;
+        this.nTime = nTime;
+        this.nBits = nBits;
+        this.nNonce = nNonce;
     }
 
     public BlockHead(BlockHead other) {
@@ -63,6 +82,32 @@ public class BlockHead implements Serializable {
 //        this.hashMerkleRoot = hashMerkleRoot;
 //    }
 
+    /**
+     * serialize to byte[] for disk storage
+     * @return serialized data
+     */
+    public byte[] serialize() throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bos.write(hashPrevBlock.getBytes());
+        bos.write(Utils.uint32ToByteArrayLE(nTime));
+        bos.write(Utils.uint32ToByteArrayLE(nBits));
+        bos.write(Utils.uint32ToByteArrayLE(nNonce));
+        return bos.toByteArray();
+    }
+
+    /**
+     * deserialize data to a block head
+     * @param data
+     */
+    public void deserialize(byte[] data) {
+        byte[] hash = new byte[32];
+        System.arraycopy(data, 0, hash, 0, 32);
+        hashPrevBlock = new SHA256Hash(hash);
+        nTime = Utils.readUint32LE(data, 32);
+        nBits = Utils.readUint32LE(data, 32 + 4);
+        nNonce = Utils.readUint32LE(data, 32 + 8);
+    }
+
     public long getnTime() {
         return nTime;
     }
@@ -85,5 +130,31 @@ public class BlockHead implements Serializable {
 
     public void setnNonce(long nNonce) {
         this.nNonce = nNonce;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BlockHead blockHead = (BlockHead) o;
+
+        return new EqualsBuilder()
+                .append(nTime, blockHead.nTime)
+                .append(nBits, blockHead.nBits)
+                .append(nNonce, blockHead.nNonce)
+                .append(hashPrevBlock, blockHead.hashPrevBlock)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(hashPrevBlock)
+                .append(nTime)
+                .append(nBits)
+                .append(nNonce)
+                .toHashCode();
     }
 }

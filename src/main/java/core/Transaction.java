@@ -66,11 +66,6 @@ public class Transaction implements Serializable {
             logger.info("isValid(): outputs empty");
             return false;
         }
-        // size limit
-        if (Utils.getObjectSerializedSize(this) > Block.MAX_BLOCK_SIZE) {
-            logger.info("isValid(): transaction oversize");
-            return false;
-        }
         // check for negative output
         for (TransactionOutput out : outputs) {
             if (out.getValue() < 0) {

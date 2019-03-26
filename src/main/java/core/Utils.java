@@ -172,6 +172,13 @@ public class Utils {
         return buf.toString();
     }
 
+    public static long readUint32LE(byte[] bytes, int offset) {
+        return ((bytes[offset++] & 0xFFL) << 0) |
+                ((bytes[offset++] & 0xFFL) << 8) |
+                ((bytes[offset++] & 0xFFL) << 16) |
+                ((bytes[offset] & 0xFFL) << 24);
+    }
+
     public static long readUint32BE(byte[] bytes, int offset) {
         return ((bytes[offset + 0] & 0xFFL) << 24) |
                 ((bytes[offset + 1] & 0xFFL) << 16) |
@@ -212,11 +219,31 @@ public class Utils {
         return decodeMPI(bytes);
     }
 
+    /**
+     * convert long value into byte array in big-endian
+     * @param val
+     * @param out
+     * @param offset
+     */
     public static void uint32ToByteArrayBE(long val, byte[] out, int offset) {
         out[offset + 0] = (byte) (0xFF & (val >> 24));
         out[offset + 1] = (byte) (0xFF & (val >> 16));
         out[offset + 2] = (byte) (0xFF & (val >> 8));
         out[offset + 3] = (byte) (0xFF & (val >> 0));
+    }
+
+    /**
+     * convert long value to byte array in little-endian
+     * @param value
+     * @return converted byte array
+     */
+    public static byte[] uint32ToByteArrayLE(long value) {
+        byte[] out = new byte[4];
+        out[0] = (byte)(0xFF & (value >> 0));
+        out[1] = (byte)(0xFF & (value >> 8));
+        out[2] = (byte)(0xFF & (value >> 16));
+        out[3] = (byte)(0xFF & (value >> 24));
+        return out;
     }
 
     /**
@@ -237,7 +264,7 @@ public class Utils {
             length++;
 
         byte[] result = new byte[length + 4];
-        System.arraycopy(array, 0, result, length - array.length + 3, array.length);
+        System.arraycopy(array, 0, result, length - array.length + 4, array.length);
         uint32ToByteArrayBE(length, result, 0);
         if (isNegative)
             result[4] |= 0x80;
@@ -262,5 +289,6 @@ public class Utils {
         result |= value.signum() == -1 ? 0x00800000 : 0;
         return result;
     }
+
 
 }
