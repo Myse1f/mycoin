@@ -8,8 +8,10 @@ import exception.BlockPersistenceException;
 import exception.VerificationException;
 import persistence.BlockPersistence;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 /**
  * Wrap a {@link Block} object with extra data that can be derived from the block chain in order to
@@ -18,6 +20,9 @@ import java.math.BigInteger;
  */
 public class StoredBlock implements Serializable {
     private static final long serialVersionUID = -2693437206206842414L;
+    private static final int CHAIN_WORK_BYTES = 16; // 16 bytes for chainwork storage
+    public static final int SIZE = 4 + CHAIN_WORK_BYTES + Block.BLOCK_HEAD_SIZE; // 4 bytes for height
+    private static final byte[] EMPTY_BYTES = new byte[CHAIN_WORK_BYTES];
 
     private Block block;
     private BigInteger chainWork; // cumulative work from genesis block
@@ -84,5 +89,28 @@ public class StoredBlock implements Serializable {
      */
     public StoredBlock getPreviousBlock(BlockPersistence source) throws BlockPersistenceException {
         return source.get(block.getHashPrevBlock());
+    }
+
+    public void serialize(ByteBuffer buf) throws IOException {
+        buf.putInt(height);
+        byte[] chainWorkBytes = chainWork.toByteArray();
+        /** chainWork use a constant 16 bytes to store, thus padding with 0 if necessary */
+        if (chainWorkBytes.length < CHAIN_WORK_BYTES) {
+            buf.put(EMPTY_BYTES, 0, CHAIN_WORK_BYTES - chainWorkBytes.length);
+        }
+        buf.put(chainWorkBytes);
+        buf.put(block.serialize());
+        buf.position(0);
+    }
+
+    public static StoredBlock deserialize(ByteBuffer buf) {
+        byte[] chainWorkBytes = new byte[StoredBlock.CHAIN_WORK_BYTES];
+        int height = buf.getInt();
+        buf.get(chainWorkBytes);
+        BigInteger chainWork = new BigInteger(1, chainWorkBytes);
+        byte[] header = new byte[BlockHead.BLOCK_HEAD_SIZE];
+        buf.get(header);
+        BlockHead block = Block.deserialize(header);
+        return new StoredBlock(new Block(block), chainWork, height);
     }
 }

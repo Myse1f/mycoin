@@ -99,13 +99,14 @@ public class BlockHead implements Serializable {
      * deserialize data to a block head
      * @param data
      */
-    public void deserialize(byte[] data) {
+    public static BlockHead deserialize(byte[] data) {
         byte[] hash = new byte[32];
         System.arraycopy(data, 0, hash, 0, 32);
-        hashPrevBlock = new SHA256Hash(hash);
-        nTime = Utils.readUint32LE(data, 32);
-        nBits = Utils.readUint32LE(data, 32 + 4);
-        nNonce = Utils.readUint32LE(data, 32 + 8);
+        SHA256Hash hashPrevBlock = new SHA256Hash(hash);
+        long nTime = Utils.readUint32LE(data, 32);
+        long nBits = Utils.readUint32LE(data, 32 + 4);
+        long nNonce = Utils.readUint32LE(data, 32 + 8);
+        return new BlockHead(hashPrevBlock, nTime, nBits, nNonce);
     }
 
     public long getnTime() {

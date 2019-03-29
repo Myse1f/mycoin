@@ -122,9 +122,7 @@ public class DiskBlockPersistence implements BlockPersistence {
         }
 
         public BlockHead getHead() {
-            BlockHead block =  new BlockHead();
-            block.deserialize(blockHead);
-            return block;
+            return BlockHead.deserialize(blockHead);
         }
 
         public int getHeight() {
@@ -249,7 +247,6 @@ public class DiskBlockPersistence implements BlockPersistence {
         // Use our own file pointer within the tight loop as updating channel positions is really expensive.
         long pos = startPos;
         Record record = new Record();
-        int numMoves = 0;
         do {
             if (!record.read(channel, pos, buf))
                 throw new IOException("Failed to read buffer");
@@ -267,7 +264,6 @@ public class DiskBlockPersistence implements BlockPersistence {
                 pos = pos - Record.SIZE;
                 assert pos >= 1 + 32 : pos;
             }
-            numMoves++;
         } while (pos != startPos);
         // Was never stored.
         channel.position(pos);
@@ -287,6 +283,17 @@ public class DiskBlockPersistence implements BlockPersistence {
         try {
             this.chainTip = block.getBlock().getHash();
             channel.write(ByteBuffer.wrap(this.chainTip.getBytes()), 1);
+        } catch (IOException e) {
+            throw new BlockPersistenceException(e);
+        }
+    }
+
+    @Override
+    public void close() throws BlockPersistenceException {
+        blockCache.clear();
+        notFoundCache.clear();
+        try {
+            this.file.close();
         } catch (IOException e) {
             throw new BlockPersistenceException(e);
         }

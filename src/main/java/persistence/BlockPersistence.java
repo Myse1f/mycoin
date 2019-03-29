@@ -23,4 +23,7 @@ public interface BlockPersistence {
 
     /** set the head of chain */
     void setChainTip(StoredBlock block) throws BlockPersistenceException;
+
+    /** close the source */
+    void close() throws BlockPersistenceException;
 }
