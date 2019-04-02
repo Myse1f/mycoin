@@ -29,7 +29,6 @@ public class TCPNetworkConnection implements NetworkConnection {
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
     private final PeerAddress peer;
-    private final NetworkParameters params;
 
     /**
      * Connect to a given IP address and do the version handshake
@@ -38,15 +37,13 @@ public class TCPNetworkConnection implements NetworkConnection {
      * | <- version |
      * | verback -> |
      * @param peerAddress
-     * @param params
      * @param connectTimeoutMsec
      * @throws IOException
      */
-    public TCPNetworkConnection(PeerAddress peerAddress, NetworkParameters params, int connectTimeoutMsec) throws IOException, ProtocolException {
-        this.params = params;
+    public TCPNetworkConnection(PeerAddress peerAddress, int connectTimeoutMsec) throws IOException, ProtocolException {
         this.peer = peerAddress;
 
-        int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : params.port;
+        int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : NetworkParameters.getNetworkParameters().port;
         InetSocketAddress address = new InetSocketAddress(peer.getAddr(), port);
         socket = new Socket();
         socket.connect(address, connectTimeoutMsec);
@@ -73,7 +70,7 @@ public class TCPNetworkConnection implements NetworkConnection {
     }
 
     public TCPNetworkConnection(InetAddress address, NetworkParameters params, int connectTimeoutMsec) throws IOException, ProtocolException {
-        this(new PeerAddress(address), params, connectTimeoutMsec);
+        this(new PeerAddress(address), connectTimeoutMsec);
     }
 
     /**

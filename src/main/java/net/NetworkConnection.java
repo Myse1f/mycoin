@@ -37,5 +37,5 @@ public interface NetworkConnection {
     /**
      * Returns the address of the other side of the network connection
      */
-    public PeerAddress getPeerAddress();
+    PeerAddress getPeerAddress();
 }

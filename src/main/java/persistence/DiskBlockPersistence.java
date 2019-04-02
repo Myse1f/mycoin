@@ -86,7 +86,6 @@ public class DiskBlockPersistence implements BlockPersistence {
         }
 
         public static void write(FileChannel channel, StoredBlock block) throws IOException {
-            // TODO add index using LevelDB
             ByteBuffer buf = ByteBuffer.allocate(Record.SIZE);
             buf.putInt(block.getHeight());
             byte[] chainWorkBytes = block.getChainWork().toByteArray();

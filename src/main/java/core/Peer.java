@@ -26,8 +26,6 @@ public class Peer {
     public static final int CONNECT_TIMEOUT_MSEC = 60000;
 
     private NetworkConnection connection;
-    private final NetworkParameters params;
-
 
     private boolean running;
     private PeerAddress address;
@@ -36,8 +34,7 @@ public class Peer {
     private Set<Inv> invKonwn = new HashSet<>();
     private Set<PeerAddress> addrKnown = new HashSet<>();
 
-    public Peer(NetworkParameters params, PeerAddress address, BlockChain blockChain) {
-        this.params = params;
+    public Peer(PeerAddress address, BlockChain blockChain) {
         this.blockChain = blockChain;
         this.address = address;
     }
@@ -45,8 +42,8 @@ public class Peer {
     /**
      * Construct a peer that uses the given, already connected network connection object.
      */
-    public Peer(NetworkParameters params, BlockChain blockChain, NetworkConnection connection) {
-        this(params, null, blockChain);
+    public Peer(BlockChain blockChain, NetworkConnection connection) {
+        this(null, blockChain);
         this.connection = connection;
         this.address = connection.getPeerAddress();
     }
@@ -77,10 +74,8 @@ public class Peer {
 
     public void connect() throws PeerException {
         try {
-            connection = new TCPNetworkConnection(address, params, CONNECT_TIMEOUT_MSEC);
-        } catch (ProtocolException e) {
-            throw new PeerException(e);
-        } catch (IOException e) {
+            connection = new TCPNetworkConnection(address, CONNECT_TIMEOUT_MSEC);
+        } catch (ProtocolException | IOException e) {
             throw new PeerException(e);
         }
     }
