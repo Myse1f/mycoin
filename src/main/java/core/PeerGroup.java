@@ -49,6 +49,16 @@ public class PeerGroup {
         };
     }
 
+    /**
+     * process the getdata message, this version only request for block data
+     * @param m inv message
+     * @return a message contains request data
+     */
+    private synchronized List<Message> processGetData(Message m) {
+        // TODO
+        return null;
+    }
+
     public synchronized PeerGroup getInstance(BlockChain chain) {
         if (peerGroup == null) {
             peerGroup = new PeerGroup(chain);
