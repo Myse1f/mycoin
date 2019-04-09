@@ -11,12 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static core.Utils.doubleDigest;
-import static core.Utils.doubleDigestTwoBuffers;
 
 /**
  * A {@link Block} contains a header which can validate its correctness
@@ -96,6 +93,15 @@ public class Block extends BlockHead {
             throw new VerificationException("nBits is error: " + target.toString());
         }
         return target;
+    }
+
+    public boolean verifyBlock() throws VerificationException {
+        BigInteger target = getnBitsAsInteger();
+        BigInteger current = getHash().toBigInteger();
+        if (current.compareTo(target) > 0) {
+            return false;
+        }
+        return true;
     }
 
     @Override

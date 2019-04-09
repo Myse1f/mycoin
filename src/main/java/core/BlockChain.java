@@ -13,6 +13,7 @@ import persistence.BlockPersistence;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -66,7 +67,7 @@ public class BlockChain {
     public synchronized boolean add(Block block, boolean connect) throws BlockPersistenceException, VerificationException {
         if (System.currentTimeMillis() - lastAddTime > 1000) {
             if (blocksAdded > 1) {
-                logger.info("{} blocks per second.", blocksAdded);
+                logger.debug("{} blocks per second.", blocksAdded);
             }
             lastAddTime = System.currentTimeMillis();
             blocksAdded = 0;
@@ -78,7 +79,10 @@ public class BlockChain {
             return true;
         }
 
-        // TODO verify block (proof of work and timestamp)
+        if(!block.verifyBlock()) {
+            logger.error("Fail to verify block: ", block.getHash().toString());
+            throw new VerificationException("Fail to verify block.");
+        }
 
         StoredBlock prevBlock = blockPersistence.get(block.getHashPrevBlock());
 
@@ -220,20 +224,64 @@ public class BlockChain {
     }
 
 
-    private void tryConnectUnconnectedBlocks() {
-        //TODO
+    /**
+     * try to connect cached unconnected blocks
+     */
+    private void tryConnectUnconnectedBlocks() throws BlockPersistenceException, VerificationException {
+        int blockConnected = 0;
+        do {
+            blockConnected = 0;
+            Iterator<Block> it = unconnectedBlocks.iterator();
+            while (it.hasNext()) {
+                Block block = it.next();
+                logger.debug("Try to connect {}", block.getHash());
+                StoredBlock prev = blockPersistence.get(block.getHashPrevBlock());
+                if (prev == null) {
+                    logger.debug("  Can't be connected.");
+                    continue;
+                }
+                add(block, false); // set false to avoid recurse infinitely
+                it.remove();
+                blockConnected++;
+            }
+            if (blockConnected > 0) {
+                logger.debug("Connected {} unconnected blocks.", blockConnected);
+            }
+        } while (blockConnected > 0);
     }
 
-    private void handleReOrganize(StoredBlock newBlock) {
-        // TODO
+    private void handleReOrganize(StoredBlock newBlock) throws BlockPersistenceException {
+        StoredBlock splitPoint = findSplit(newBlock, chainTip);
+        logger.info("Re-organize after split at height {}", splitPoint.getHeight());
+        logger.info("Old chain head: {}", chainTip.getBlock().getHash().toString());
+        logger.info("New chain head: {}", newBlock.getBlock().getHash().toString());
+        logger.info("Split at block: {}", splitPoint.getBlock().getHash().toString());
+        setChainTip(newBlock);
     }
 
     public StoredBlock getChainTip() {
-        return chainTip;
+        synchronized (chainTipLock) {
+            return chainTip;
+        }
     }
 
-    public void setChainTip(StoredBlock chainTip) {
-        this.chainTip = chainTip;
+    public void setChainTip(StoredBlock chainTip) throws BlockPersistenceException {
+        blockPersistence.setChainTip(chainTip);
+        synchronized (chainTipLock) {
+            this.chainTip = chainTip;
+        }
+    }
+
+    public int getChainHeight() {
+        return getChainTip().getHeight();
+    }
+
+    public boolean hasBlock(SHA256Hash hash) throws BlockPersistenceException {
+        return blockPersistence.get(hash) != null;
+    }
+
+    public BlockPersistence getBlockPeresistence() {
+        return this.blockPersistence;
     }
 
 }
