@@ -34,6 +34,11 @@ public class PeerGroup {
     private List<PeerEventListener> peerEventListeners;
     private PeerEventListener downloadListener;
 
+    /** can only be run once at the beginning */
+    private static void init(BlockChain chain) {
+        peerGroup = new PeerGroup(chain);
+    }
+
     private PeerGroup(BlockChain chain) {
         this.blockchain = chain;
         this.connectionDelayMillis = DEAFAULT_CONNECTION_DELAY_MILLIS;
@@ -43,8 +48,7 @@ public class PeerGroup {
         getDataListener = new AbstractPeerEventListener() {
             @Override
             public List<Message> getData(Peer peer, Message m) {
-                //TODO
-                return null;
+                return processGetData(m);
             }
         };
     }
@@ -59,9 +63,9 @@ public class PeerGroup {
         return null;
     }
 
-    public synchronized PeerGroup getInstance(BlockChain chain) {
+    public synchronized PeerGroup getInstance() {
         if (peerGroup == null) {
-            peerGroup = new PeerGroup(chain);
+            throw new RuntimeException("PeerGroup is not initialized.");
         }
         return peerGroup;
     }

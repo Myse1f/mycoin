@@ -18,7 +18,15 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * LevelDB based block persistence
+ * Use memory to cache recently used blocks
+ */
 public class LevelDBBlockPersistence implements BlockPersistence {
     private static final Logger logger = LoggerFactory.getLogger(LevelDBBlockPersistence.class);
     private static final byte[] CHAIN_TIP_KEY = "chainTip".getBytes();
@@ -26,6 +34,27 @@ public class LevelDBBlockPersistence implements BlockPersistence {
     private DB db;
     private ByteBuffer buf = ByteBuffer.allocate(StoredBlock.SIZE);
     private File path;
+
+    /**
+     * Keep the cache of block into memory for up to 2050 blocks. It can help to optimize some cases where we are looking up
+     * recent blocks.
+     */
+    private LinkedHashMap<SHA256Hash, StoredBlock> blockCache = new LinkedHashMap<SHA256Hash, StoredBlock>() {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<SHA256Hash, StoredBlock> entry) {
+            return size() > 2050;
+        }
+    };
+
+    /**
+     * Keep the cache of not found block to track get() miss
+     */
+    private Set<SHA256Hash> notFoundCache = Collections.newSetFromMap(new LinkedHashMap<SHA256Hash, Boolean>() {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<SHA256Hash, Boolean> entry) {
+            return size() > 100;
+        }
+    });
 
     /** Creates a LevelDB block store using the JNI/C++ version of LevelDB. */
     public LevelDBBlockPersistence(File directory) throws BlockPersistenceException {
@@ -75,6 +104,7 @@ public class LevelDBBlockPersistence implements BlockPersistence {
             buf.clear();
             block.serialize(buf);
             db.put(block.getBlock().getHash().getBytes(), buf.array());
+            blockCache.put(block.getBlock().getHash(), block);
         } catch (IOException e) {
             throw new BlockPersistenceException(e);
         }
@@ -82,10 +112,21 @@ public class LevelDBBlockPersistence implements BlockPersistence {
 
     @Override
     public synchronized StoredBlock get(SHA256Hash hash) throws BlockPersistenceException {
-        byte[] bytes = db.get(hash.getBytes());
-        if (bytes == null)
+        StoredBlock fromeMem = blockCache.get(hash);
+        if (fromeMem != null) {
+            return fromeMem;
+        }
+        if (notFoundCache.contains(hash)) {
             return null;
-        return StoredBlock.deserialize(ByteBuffer.wrap(bytes));
+        }
+        byte[] bytes = db.get(hash.getBytes());
+        if (bytes == null) {
+            notFoundCache.add(hash);
+            return null;
+        }
+        StoredBlock blockFound = StoredBlock.deserialize(ByteBuffer.wrap(bytes));
+        blockCache.put(hash, blockFound);
+        return blockFound;
     }
 
     @Override
@@ -101,6 +142,8 @@ public class LevelDBBlockPersistence implements BlockPersistence {
     @Override
     public synchronized void close() throws BlockPersistenceException {
         try {
+            notFoundCache.clear();
+            blockCache.clear();
             db.close();
         } catch (IOException e) {
             throw new BlockPersistenceException(e);
@@ -116,6 +159,8 @@ public class LevelDBBlockPersistence implements BlockPersistence {
 
     /** Erases the contents of the database (but NOT the underlying files themselves) and then reinitialises with the genesis block. */
     public synchronized void reset() throws BlockPersistenceException {
+        blockCache.clear();
+        notFoundCache.clear();
         try {
             WriteBatch batch = db.createWriteBatch();
             try {
