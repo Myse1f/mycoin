@@ -11,6 +11,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 public class Utils {
     private static final Logger logger = LoggerFactory.getLogger(Utils.class);
@@ -108,13 +109,26 @@ public class Utils {
      * @return serialized bytes
      * @throws IOException
      */
-    public static <T extends Serializable> byte[] objectsToByteArray(T ... objects) throws IOException {
+    public static <T extends Serializable> byte[] objectsToByteArray(List<T> objects) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
         byte[] ret;
         for (Object object : objects) {
             oos.writeObject(object);
         }
+        oos.flush();
+        ret = bos.toByteArray();
+        oos.close();
+        bos.close();
+
+        return ret;
+    }
+
+    public static <T extends Serializable> byte[] objectsToByteArray(T object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        byte[] ret;
+        oos.writeObject(object);
         oos.flush();
         ret = bos.toByteArray();
         oos.close();

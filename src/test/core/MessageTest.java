@@ -6,6 +6,10 @@ package core;
 
 import org.junit.Test;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class MessageTest {
@@ -17,4 +21,22 @@ public class MessageTest {
         msg.setChecksum(1);
         assertFalse(msg.valid());
     }
+
+
+
+    @Test
+    public void invMessageTest() throws IOException, ClassNotFoundException {
+        Message msg = new Message("inv", 1, null);
+        List<Inv> invs = new ArrayList<>();
+        invs.add(new Inv(Inv.InvType.MSG_BLOCK, SHA256Hash.ZERO_HASH));
+        invs.add(new Inv(Inv.InvType.MSG_BLOCK, SHA256Hash.ZERO_HASH));
+        invs.add(new Inv(Inv.InvType.MSG_BLOCK, SHA256Hash.ZERO_HASH));
+        invs.add(new Inv(Inv.InvType.MSG_BLOCK, SHA256Hash.ZERO_HASH));
+        invs.add(new Inv(Inv.InvType.MSG_BLOCK, SHA256Hash.ZERO_HASH));
+        msg.setInvsIntoPayload(invs);
+        List<Inv> invs1 = msg.getPayloadAsInvs();
+        assertEquals(invs, invs1);
+    }
+
+
 }

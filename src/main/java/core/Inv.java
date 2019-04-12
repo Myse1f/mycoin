@@ -4,6 +4,12 @@
  */
 package core;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 
 /**
@@ -18,6 +24,10 @@ public class Inv implements Serializable {
     public Inv(InvType type, SHA256Hash hash) {
         this.type = type;
         this.hash = hash;
+    }
+
+    public static Inv readInv(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        return (Inv) in.readObject();
     }
 
     public InvType getType() {
@@ -40,5 +50,27 @@ public class Inv implements Serializable {
         UNKNOWN,
         MSG_BLOCK,
         MGS_TX
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Inv inv = (Inv) o;
+
+        return new EqualsBuilder()
+                .append(type, inv.type)
+                .append(hash, inv.hash)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(type)
+                .append(hash)
+                .toHashCode();
     }
 }

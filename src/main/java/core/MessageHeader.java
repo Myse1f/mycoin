@@ -95,12 +95,6 @@ public class MessageHeader implements Serializable {
             }
         }
 
-        /** check size */
-        if (messageSize < 0 || messageSize > MAX_MESSAGE_SIZE) {
-            logger.error("messageSize is illegal!");
-            return false;
-        }
-
         return true;
     }
 
