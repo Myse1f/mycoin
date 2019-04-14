@@ -280,8 +280,4 @@ public class BlockChain {
         return blockPersistence.get(hash) != null;
     }
 
-    public BlockPersistence getBlockPeresistence() {
-        return this.blockPersistence;
-    }
-
 }

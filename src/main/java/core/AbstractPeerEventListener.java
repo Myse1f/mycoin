@@ -29,7 +29,7 @@ public class AbstractPeerEventListener implements PeerEventListener {
     }
 
     @Override
-    public void onPeerDisconnceted(Peer peer, int peerCount) {
+    public void onPeerDisconnected(Peer peer, int peerCount) {
 
     }
 

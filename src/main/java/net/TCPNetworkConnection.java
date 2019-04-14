@@ -18,8 +18,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import static core.Utils.*;
-
 /**
  * {@link TCPNetworkConnection} is used for connecting a peer over the stand TCP/IP protocol
  */
@@ -30,6 +28,16 @@ public class TCPNetworkConnection implements NetworkConnection {
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
     private final PeerAddress peer;
+
+    /**
+     * Create a connection with connected socket
+     */
+    public TCPNetworkConnection(Socket socket) throws IOException {
+        this.socket = socket;
+        this.peer = new PeerAddress(socket.getInetAddress(), socket.getPort());
+        out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
+    }
 
     /**
      * Connect to a given IP address and do the version handshake
@@ -70,7 +78,7 @@ public class TCPNetworkConnection implements NetworkConnection {
         logger.info("Connect to peer: {}", peerAddress);
     }
 
-    public TCPNetworkConnection(InetAddress address, NetworkParameters params, int connectTimeoutMsec) throws IOException, ProtocolException {
+    public TCPNetworkConnection(InetAddress address, int connectTimeoutMsec) throws IOException, ProtocolException {
         this(new PeerAddress(address), connectTimeoutMsec);
     }
 
@@ -142,5 +150,11 @@ public class TCPNetworkConnection implements NetworkConnection {
     @Override
     public PeerAddress getPeerAddress() {
         return peer;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + peer.getAddr().getHostAddress() + "]:" + peer.getPort() + " (" + (socket.isConnected() ? "connected" :
+                "disconnected") + ")";
     }
 }

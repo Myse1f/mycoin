@@ -32,7 +32,6 @@ public class Peer {
     private final BlockChain blockChain;
 
     private Set<Inv> invKonwn = new HashSet<>();
-    private Set<PeerAddress> addrKnown = new HashSet<>();
 
     public Peer(PeerAddress address, BlockChain blockChain) {
         this.blockChain = blockChain;
@@ -54,15 +53,6 @@ public class Peer {
      */
     public void pushInvKnown(Inv inv) {
         invKonwn.add(inv);
-    }
-
-
-    /**
-     * add a peer address into known addresses
-     * @param addr
-     */
-    public void pushAddrKnown(PeerAddress addr) {
-        addrKnown.add(addr);
     }
 
     /**
@@ -137,5 +127,23 @@ public class Peer {
         } catch (IOException e) {
             // Don't care about this.
         }
+    }
+
+    @Override
+    public String toString() {
+        if (address == null) {
+            // User-provided NetworkConnection object.
+            return "Peer(NetworkConnection:" + connection + ")";
+        } else {
+            return "Peer(" + address.getAddr() + ":" + address.getPort() + ")";
+        }
+    }
+
+    // TODO
+    public void removeEventListener(PeerEventListener getDataListener) {
+    }
+
+    // TODO
+    public void addEventListener(PeerEventListener getDataListener) {
     }
 }

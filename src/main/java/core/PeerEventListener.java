@@ -41,7 +41,7 @@ public interface PeerEventListener {
      * @param peer      the peer
      * @param peerCount the total number of connected peers
      */
-    void onPeerDisconnceted(Peer peer, int peerCount);
+    void onPeerDisconnected(Peer peer, int peerCount);
 
     /**
      * process "getdata" message
