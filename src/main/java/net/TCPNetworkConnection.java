@@ -35,8 +35,8 @@ public class TCPNetworkConnection implements NetworkConnection {
     public TCPNetworkConnection(Socket socket) throws IOException {
         this.socket = socket;
         this.peer = new PeerAddress(socket.getInetAddress(), socket.getPort());
-        out = new ObjectOutputStream(socket.getOutputStream());
         in = new ObjectInputStream(socket.getInputStream());
+        out = new ObjectOutputStream(socket.getOutputStream());
     }
 
     /**
@@ -62,7 +62,7 @@ public class TCPNetworkConnection implements NetworkConnection {
 
         //begin handshake
         logger.debug("Connecting and handshaking");
-        writeMessage(createVerbackMessage());
+        writeMessage(createVersionMessage());
         Message versionMsg = readMessage();
         if (!versionMsg.getCommand().equals(MessageHeader.VERSION)) {
             throw new ProtocolException("First message received was not a version message but rather " + versionMsg);
@@ -87,7 +87,7 @@ public class TCPNetworkConnection implements NetworkConnection {
      * @return version message
      * @throws IOException
      */
-    private Message ceateVersionMessage() throws IOException {
+    private Message createVersionMessage() throws IOException {
         Message versionMessage = new Message(MessageHeader.VERSION, 0, null);
         byte[] payload = Utils.objectsToByteArray(new Message()); //TODO version message payload
         versionMessage.setMessageSize(payload.length);

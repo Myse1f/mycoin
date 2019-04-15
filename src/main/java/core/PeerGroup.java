@@ -6,7 +6,9 @@ package core;
 
 import exception.BlockPersistenceException;
 import exception.PeerException;
+import net.NetworkParameters;
 import net.PeerAddress;
+import net.TCPNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.EventListenerInvoker;
@@ -14,6 +16,7 @@ import utils.EventListenerInvoker;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -24,8 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PeerGroup {
     private static final Logger logger = LoggerFactory.getLogger(PeerGroup.class);
-    private static final int DEAFAULT_CONNECTIONS = 2; // limited by my machines number
-    private static final int DEAFAULT_CONNECTION_DELAY_MILLIS = 5000;
+    private static final int DEAFAULT_CONNECTIONS = 4; // limited by my machines number
     private static final int THREAD_KEEP_ALIVE_SECONDS = 1;
 
     private static PeerGroup peerGroup; //singleton
@@ -33,10 +35,9 @@ public class PeerGroup {
     private Set<Peer> peers; // connected peers
     private Peer downloadPeer; // the peer where we
     private BlockChain blockchain;
-    private int connectionDelayMillis;
     private boolean running;
     private ThreadPoolExecutor peerPool; // thread pool for peers
-
+    private PeerGroupThread peerGroupThread;
     private PeerEventListener getDataListener;
     private List<PeerEventListener> peerEventListeners;
     private PeerEventListener downloadListener;
@@ -48,7 +49,6 @@ public class PeerGroup {
 
     private PeerGroup(BlockChain chain) {
         this.blockchain = chain;
-        this.connectionDelayMillis = DEAFAULT_CONNECTION_DELAY_MILLIS;
         this.peers = Collections.synchronizedSet(new HashSet<>());
         this.peerEventListeners = new ArrayList<>();
         this.peerPool = new ThreadPoolExecutor(DEAFAULT_CONNECTIONS, DEAFAULT_CONNECTIONS, THREAD_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1), new PeerThreadFactory());
@@ -124,7 +124,7 @@ public class PeerGroup {
             logger.info("Add peer to group: {}", peer);
         }
 
-        runNewPeer(peer);
+        runNewPeer(peer, true);
     }
 
     /**
@@ -136,14 +136,16 @@ public class PeerGroup {
         return result;
     }
 
-    public synchronized void start() {
+    public synchronized void start() throws IOException {
+        this.peerGroupThread = new PeerGroupThread();
         this.running = true;
-        // todo running socket listener thread
+        this.peerGroupThread.start();
     }
 
-    public synchronized void stop() {
+    public synchronized void stop() throws IOException {
         if (running) {
             running = false;
+            this.peerGroupThread.shutdown();
             logger.info("Stop running peer group.");
         }
     }
@@ -154,13 +156,19 @@ public class PeerGroup {
 
     /**
      * run a new peer in a thread
+     * the peer may be created from serverSocket thus need not to connect
+     * if connect is true which means connect to it actively, then connect to the peer
      * @param peer
      */
-    public void runNewPeer(final Peer peer) {
+    public void runNewPeer(final Peer peer, boolean connect) {
         peerPool.execute(new Runnable() {
             @Override
             public void run() {
                 try {
+                    if (connect) {
+                        logger.info("Connecting to peer {}", peer);
+                        peer.connect();
+                    }
                     synchronized (PeerGroup.this) {
                         if (!running) {
                             peer.disconnect();
@@ -196,16 +204,45 @@ public class PeerGroup {
         });
     }
 
+
+
     /**
-     * Connect to a peer and download blocks from it if necessary
+     * Download the blockchain from peers.
+     * This method waits until the download is complete.  "Complete" is defined as downloading
+     * from at least one peer all the blocks that are in that peer's inventory.
      */
-    private synchronized void initialBlocksDownload(Peer peer) {
-        try {
+    private synchronized void initialBlocksDownload(PeerEventListener listener) {
+        this.downloadListener = listener;
+        synchronized (peers) {
+            if (!peers.isEmpty()) {
+                downloadFromPeer(peers.iterator().next());
+            }
+        }
+    }
+
+    /**
+     * start download blocks from specific peer
+     */
+    private void downloadFromPeer(Peer peer) {
+        try{
             peer.addEventListener(downloadListener);
             setDownloadPeer(peer);
-            // TODO peer.startBlockChainDownload();
+            peer.startBlocksDownload();
         } catch (IOException e) {
+            logger.error("Fail to start blocks download from peer {}", peer);
+        }
+    }
 
+    /**
+     * broadcast block Inv to all peers
+     */
+    public void brocastBlcokInv(Inv blockInv) throws IOException {
+        synchronized (peers) {
+            for (Peer peer : peers) {
+                if (!peer.isInvKown(blockInv)) {
+                    peer.sendMessage(new Message("inv", 0, Utils.objectsToByteArray(blockInv)));
+                }
+            }
         }
     }
 
@@ -226,7 +263,7 @@ public class PeerGroup {
                     Peer next = peers.iterator().next();
                     setDownloadPeer(next);
                     if (downloadListener != null) {
-                        initialBlocksDownload(next);
+                        downloadFromPeer(next);
                     }
                 }
             }
@@ -261,7 +298,7 @@ public class PeerGroup {
         // download the chain if we never do it
         if (downloadListener != null && downloadPeer == null) {
             logger.info("   starting downloading blocks.");
-            initialBlocksDownload(peer);
+            downloadFromPeer(peer);
         } else if (downloadPeer == null) {
             setDownloadPeer(peer);
         }
@@ -280,7 +317,41 @@ public class PeerGroup {
      */
     private final class PeerGroupThread extends Thread {
         ServerSocket serverSocket;
-        //TODO
+
+        public PeerGroupThread() throws IOException {
+            super("PeerGroup Thread");
+            serverSocket = new ServerSocket(NetworkParameters.getNetworkParameters().port);
+            setPriority(Math.max(Thread.MIN_PRIORITY, Thread.currentThread().getPriority()-1));
+            setDaemon(true);
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (isRunning()) {
+                    Socket socket = serverSocket.accept(); // block here to wait for a new inbound connection
+                    Peer peer = new Peer(blockchain, new TCPNetworkConnection(socket));
+                    runNewPeer(peer, false);
+                }
+            } catch (IOException e) {
+                // close server socket, stop this thread
+            }
+
+            // close all peer connection
+            synchronized (PeerGroup.this) {
+                running = false;
+                peerPool.shutdown();
+                synchronized (peers) {
+                    for (Peer peer : peers) {
+                        peer.disconnect();
+                    }
+                }
+            }
+        }
+
+        public void shutdown() throws IOException {
+            serverSocket.close();
+        }
     }
 
     private static class PeerThreadFactory implements ThreadFactory {

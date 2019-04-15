@@ -14,7 +14,7 @@ import java.util.List;
 public class AbstractPeerEventListener implements PeerEventListener {
 
     @Override
-    public void onBlockDownload(Peer peer, Block block, int left) {
+    public void onBlockDownloaded(Peer peer, Block block, int left) {
 
     }
 

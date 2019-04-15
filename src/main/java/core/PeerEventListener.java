@@ -17,7 +17,7 @@ public interface PeerEventListener {
      * @param block the block downloaded
      * @param left  the number of blocks to download
      */
-    void onBlockDownload(Peer peer, Block block, int left);
+    void onBlockDownloaded(Peer peer, Block block, int left);
 
     /**
      * when download start with the initial number of blokcs to be downloaded

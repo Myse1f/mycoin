@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -32,6 +33,7 @@ public class Peer {
     private final BlockChain blockChain;
 
     private Set<Inv> invKonwn = new HashSet<>();
+    private List<PeerEventListener> eventListeners;
 
     public Peer(PeerAddress address, BlockChain blockChain) {
         this.blockChain = blockChain;
@@ -53,6 +55,13 @@ public class Peer {
      */
     public void pushInvKnown(Inv inv) {
         invKonwn.add(inv);
+    }
+
+    /**
+     * if a inv is know by this peer
+     */
+    public boolean isInvKown(Inv inv) {
+        return invKonwn.contains(inv);
     }
 
     /**
@@ -86,12 +95,12 @@ public class Peer {
                 Message m = connection.readMessage();
                 switch (m.getCommand()) {
                     // TODO process message
+                    case MessageHeader.VERSION: break;
+                    case MessageHeader.VERBACK: break;
                     case MessageHeader.INV: break;
-                    case MessageHeader.ADDR: break;
                     case MessageHeader.BLOCK: break;
                     case MessageHeader.GETBLOCKS: break;
                     case MessageHeader.GETDATA: break;
-                    case MessageHeader.TX: break;
                     default: break;
                 }
             }
@@ -139,11 +148,20 @@ public class Peer {
         }
     }
 
-    // TODO
-    public void removeEventListener(PeerEventListener getDataListener) {
+    public synchronized void addEventListener(PeerEventListener listener) {
+        eventListeners.add(listener);
+    }
+
+    public synchronized boolean removeEventListener(PeerEventListener listener) {
+        return eventListeners.remove(listener);
     }
 
     // TODO
-    public void addEventListener(PeerEventListener getDataListener) {
+    public void startBlocksDownload() throws IOException{
+    }
+
+    // TODO
+    public void sendMessage(Message msg) throws IOException {
+        connection.writeMessage(msg);
     }
 }
