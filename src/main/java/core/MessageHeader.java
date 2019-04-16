@@ -26,6 +26,7 @@ public class MessageHeader implements Serializable {
     public static final int COMMAND_SIZE = 12;
     public static final int MESSAGE_SIZE_SIZE = Integer.BYTES;
     public static final int CHECKSUM_SIZE = Integer.BYTES;
+    public static final int SIZE = MESSAGE_START_SIZE + COMMAND_SIZE + MESSAGE_SIZE_SIZE + CHECKSUM_SIZE;
     public static final int MAX_MESSAGE_SIZE = 0x02000000;
 
     /** message type */
@@ -108,12 +109,6 @@ public class MessageHeader implements Serializable {
         ret.append(messageSize);
         ret.append(']');
         return ret.toString();
-    }
-
-    public static void main(String[] args) {
-        String a = new String(new byte[]{'a','b', 0, 0, 0});
-        System.out.println(a.replaceAll("\0", ""));
-        System.out.println(a.length());
     }
 
     public void setMessageSize(int messageSize) {

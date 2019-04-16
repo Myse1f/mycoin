@@ -21,17 +21,26 @@ import java.nio.ByteBuffer;
 public class StoredBlock implements Serializable {
     private static final long serialVersionUID = -2693437206206842414L;
     private static final int CHAIN_WORK_BYTES = 16; // 16 bytes for chainwork storage
-    public static final int SIZE = 4 + CHAIN_WORK_BYTES + Block.BLOCK_HEAD_SIZE; // 4 bytes for height
+    public static final int SIZE = 4 + CHAIN_WORK_BYTES + Block.BLOCK_HEAD_SIZE + SHA256Hash.SIZE; // 4 bytes for height
     private static final byte[] EMPTY_BYTES = new byte[CHAIN_WORK_BYTES];
 
     private Block block;
     private BigInteger chainWork; // cumulative work from genesis block
     private int height; // height of the block in block chain from 0
+    private SHA256Hash next; // next block's hash, the field of chainTip is 0
+
+    public StoredBlock(Block block, BigInteger chainWork, int height, SHA256Hash next) {
+        this.block = block;
+        this.chainWork = chainWork;
+        this.height = height;
+        this.next = next;
+    }
 
     public StoredBlock(Block block, BigInteger chainWork, int height) {
         this.block = block;
         this.chainWork = chainWork;
         this.height = height;
+        this.next = SHA256Hash.ZERO_HASH;
     }
 
     public Block getBlock() {
@@ -46,6 +55,14 @@ public class StoredBlock implements Serializable {
         return height;
     }
 
+    public SHA256Hash getNext() {
+        return this.next;
+    }
+
+    public void setNext(SHA256Hash nextHash) {
+        this.next = nextHash;
+    }
+
     /** compare whether the block has more work than the other */
     public boolean moreWorkThan(StoredBlock other) {
         return chainWork.compareTo(other.chainWork) > 0;
@@ -57,12 +74,12 @@ public class StoredBlock implements Serializable {
             return false;
         }
         StoredBlock o = (StoredBlock)other;
-        return this.block.equals(o.getBlock()) && this.chainWork.equals(o.getChainWork()) && this.height == o.getHeight();
+        return this.block.equals(o.getBlock()) && this.chainWork.equals(o.getChainWork()) && this.height == o.getHeight() && this.next.equals(o.getNext());
     }
 
     @Override
     public int hashCode() {
-        return block.hashCode() ^ chainWork.hashCode() ^ height;
+        return block.hashCode() ^ chainWork.hashCode() ^ height ^ next.hashCode();
     }
 
     @Override
@@ -91,6 +108,10 @@ public class StoredBlock implements Serializable {
         return source.get(block.getHashPrevBlock());
     }
 
+    public StoredBlock getNextBlock(BlockPersistence source) throws BlockPersistenceException {
+        return source.get(next);
+    }
+
     public void serialize(ByteBuffer buf) throws IOException {
         buf.putInt(height);
         byte[] chainWorkBytes = chainWork.toByteArray();
@@ -99,6 +120,7 @@ public class StoredBlock implements Serializable {
             buf.put(EMPTY_BYTES, 0, CHAIN_WORK_BYTES - chainWorkBytes.length);
         }
         buf.put(chainWorkBytes);
+        buf.put(next.getBytes());
         buf.put(block.serialize());
         buf.position(0);
     }
@@ -108,9 +130,12 @@ public class StoredBlock implements Serializable {
         int height = buf.getInt();
         buf.get(chainWorkBytes);
         BigInteger chainWork = new BigInteger(1, chainWorkBytes);
+        byte[] next = new byte[SHA256Hash.SIZE];
+        buf.get(next);
+        SHA256Hash hashNext = new SHA256Hash(next);
         byte[] header = new byte[BlockHead.BLOCK_HEAD_SIZE];
         buf.get(header);
         BlockHead block = Block.deserialize(header);
-        return new StoredBlock(new Block(block), chainWork, height);
+        return new StoredBlock(new Block(block), chainWork, height, hashNext);
     }
 }

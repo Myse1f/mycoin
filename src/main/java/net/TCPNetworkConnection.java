@@ -24,6 +24,8 @@ import java.net.Socket;
 public class TCPNetworkConnection implements NetworkConnection {
     private static final Logger logger = LoggerFactory.getLogger(TCPNetworkConnection.class);
 
+    private Message versionMessage;
+
     private final Socket socket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
@@ -49,8 +51,9 @@ public class TCPNetworkConnection implements NetworkConnection {
      * @param connectTimeoutMsec
      * @throws IOException
      */
-    public TCPNetworkConnection(PeerAddress peerAddress, int connectTimeoutMsec) throws IOException, ProtocolException {
+    public TCPNetworkConnection(PeerAddress peerAddress, int connectTimeoutMsec, Message versionMessage) throws IOException {
         this.peer = peerAddress;
+        this.versionMessage = versionMessage;
 
         int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : NetworkParameters.getNetworkParameters().port;
         InetSocketAddress address = new InetSocketAddress(peer.getAddr(), port);
@@ -62,45 +65,24 @@ public class TCPNetworkConnection implements NetworkConnection {
 
         //begin handshake
         logger.debug("Connecting and handshaking");
-        writeMessage(createVersionMessage());
-        Message versionMsg = readMessage();
-        if (!versionMsg.getCommand().equals(MessageHeader.VERSION)) {
-            throw new ProtocolException("First message received was not a version message but rather " + versionMsg);
-        }
-        // TODO deal with version message
-        writeMessage(createVerbackMessage());
-        Message verbackMsg = readMessage();
-        if (!verbackMsg.getCommand().equals(MessageHeader.VERBACK)) {
-            throw new ProtocolException("Returned message was not a verback message but rather " + verbackMsg);
-        }
-        // handshake finished
+        writeMessage(versionMessage);
+//        Message versionMsg = readMessage();
+//        if (!versionMsg.getCommand().equals(MessageHeader.VERSION)) {
+//            throw new ProtocolException("First message received was not a version message but rather " + versionMsg);
+//        }
+//
+//        writeMessage(createVerbackMessage());
+//        Message verbackMsg = readMessage();
+//        if (!verbackMsg.getCommand().equals(MessageHeader.VERBACK)) {
+//            throw new ProtocolException("Returned message was not a verback message but rather " + verbackMsg);
+//        }
+//        // handshake finished
 
-        logger.info("Connect to peer: {}", peerAddress);
+//        logger.info("Connect to peer: {}", peerAddress);
     }
 
-    public TCPNetworkConnection(InetAddress address, int connectTimeoutMsec) throws IOException, ProtocolException {
-        this(new PeerAddress(address), connectTimeoutMsec);
-    }
-
-    /**
-     * create a version message
-     * @return version message
-     * @throws IOException
-     */
-    private Message createVersionMessage() throws IOException {
-        Message versionMessage = new Message(MessageHeader.VERSION, 0, null);
-        byte[] payload = Utils.objectsToByteArray(new Message()); //TODO version message payload
-        versionMessage.setMessageSize(payload.length);
-        versionMessage.setPayload(payload);
-        return versionMessage;
-    }
-
-    /**
-     * create a verback message
-     * @return
-     */
-    private Message createVerbackMessage() {
-        return new Message(MessageHeader.VERBACK, 0, null);
+    public TCPNetworkConnection(InetAddress address, int connectTimeoutMsec, Message versionMessage) throws IOException, ProtocolException {
+        this(new PeerAddress(address), connectTimeoutMsec, versionMessage);
     }
 
     @Override

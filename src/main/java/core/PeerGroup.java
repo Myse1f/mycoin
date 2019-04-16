@@ -230,6 +230,8 @@ public class PeerGroup {
             peer.startBlocksDownload();
         } catch (IOException e) {
             logger.error("Fail to start blocks download from peer {}", peer);
+        } catch (PeerException e) {
+            logger.error("Peer has some error, {}", e);
         }
     }
 

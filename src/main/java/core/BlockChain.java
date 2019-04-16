@@ -175,7 +175,10 @@ public class BlockChain {
      */
     private void connectBlock(StoredBlock newBlock, StoredBlock prevBlock) throws BlockPersistenceException {
         if (prevBlock.equals(chainTip)) {
-            // a new tip
+            // a new tip, first set the tip's next field
+            chainTip.setNext(newBlock.getBlock().getHash());
+            blockPersistence.put(chainTip);
+            // set new chain tip
             setChainTip(newBlock);
             logger.debug("Chain height is now {}.", chainTip.getHeight());
         } else {

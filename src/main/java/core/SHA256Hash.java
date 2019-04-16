@@ -18,6 +18,7 @@ import java.util.Arrays;
 public final class SHA256Hash implements Serializable {
     private static final long serialVersionUID = -3081155937186535182L;
     private static final int HASHCODE_BYTES_TO_CHECK = 5;
+    public static final int SIZE = 32;
 
     public static final SHA256Hash ZERO_HASH = new SHA256Hash(new byte[32]);
 
