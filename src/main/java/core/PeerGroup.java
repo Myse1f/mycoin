@@ -59,6 +59,20 @@ public class PeerGroup {
                 return processGetData(m);
             }
         };
+
+        downloadListener = new DownloadListener() {
+            @Override
+            public void onBlockDownloaded(Peer peer, Block block, int blocksLeft) {
+                super.onBlockDownloaded(peer, block, blocksLeft);
+                // broadcast block inv to all peers
+                Inv blockInv = new Inv(Inv.InvType.MSG_BLOCK, block.getHash());
+                try {
+                    brocastBlcokInv(blockInv);
+                } catch (IOException e) {
+                    logger.error("Fail to broad Block Inv {}", blockInv);
+                }
+            }
+        };
     }
 
     /**
@@ -211,8 +225,7 @@ public class PeerGroup {
      * This method waits until the download is complete.  "Complete" is defined as downloading
      * from at least one peer all the blocks that are in that peer's inventory.
      */
-    private synchronized void initialBlocksDownload(PeerEventListener listener) {
-        this.downloadListener = listener;
+    private synchronized void initialBlocksDownload() {
         synchronized (peers) {
             if (!peers.isEmpty()) {
                 downloadFromPeer(peers.iterator().next());
@@ -282,6 +295,7 @@ public class PeerGroup {
     private synchronized void setDownloadPeer(Peer peer) {
         if (downloadPeer != null) {
             logger.info("Unsetting download peer: {}", downloadPeer);
+            downloadPeer.removeEventListener(downloadListener);
         }
         downloadPeer = peer;
         if (downloadPeer != null) {

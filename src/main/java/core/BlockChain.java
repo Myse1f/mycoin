@@ -110,7 +110,7 @@ public class BlockChain {
 
     /**
      * check the if difficulty adaption is correct
-     * every {Networkparameters.interval} change once
+     * every Networkparameters.interval change once
      * @param prevBlock
      * @param newBlock
      * @throws VerificationException
@@ -131,7 +131,6 @@ public class BlockChain {
             return;
         }
 
-        long now = System.currentTimeMillis();
         StoredBlock cursor = blockPersistence.get(prev.getHash());
         for (int i = 0; i < blocksInterval - 1; i++) {
             if (cursor == null) {

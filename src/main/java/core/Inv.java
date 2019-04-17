@@ -53,6 +53,11 @@ public class Inv implements Serializable {
     }
 
     @Override
+    public String toString() {
+        return "Type: " + type.toString() + " Hash: " + hash.toString();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
 

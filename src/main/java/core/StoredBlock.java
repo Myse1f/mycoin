@@ -5,7 +5,9 @@
 package core;
 
 import exception.BlockPersistenceException;
+import exception.ProtocolException;
 import exception.VerificationException;
+import net.NetworkParameters;
 import persistence.BlockPersistence;
 
 import java.io.IOException;
@@ -112,6 +114,9 @@ public class StoredBlock implements Serializable {
         return source.get(next);
     }
 
+    /**
+     * serialize the block into ByteBuffer
+     */
     public void serialize(ByteBuffer buf) throws IOException {
         buf.putInt(height);
         byte[] chainWorkBytes = chainWork.toByteArray();
@@ -125,6 +130,9 @@ public class StoredBlock implements Serializable {
         buf.position(0);
     }
 
+    /**
+     * deserialize the buf into a StoredBlock
+     */
     public static StoredBlock deserialize(ByteBuffer buf) {
         byte[] chainWorkBytes = new byte[StoredBlock.CHAIN_WORK_BYTES];
         int height = buf.getInt();
@@ -137,5 +145,43 @@ public class StoredBlock implements Serializable {
         buf.get(header);
         BlockHead block = Block.deserialize(header);
         return new StoredBlock(new Block(block), chainWork, height, hashNext);
+    }
+
+    /**
+     * base the block, get the nBits of next block according difficulty adaption
+     */
+    public static long getNextnBits(StoredBlock prevBlock, BlockPersistence source) throws BlockPersistenceException, ProtocolException {
+        Block prev = prevBlock.getBlock();
+        int blocksInterval = NetworkParameters.getNetworkParameters().interval;
+        // check interval
+        if ((prevBlock.getHeight() + 1) % blocksInterval != 0) {
+            return prev.getnBits();
+        }
+
+        StoredBlock cursor = source.get(prev.getHash());
+        for (int i = 0; i < blocksInterval - 1; i++) {
+            if (cursor == null) {
+                throw new ProtocolException("Difficulty transition point but we dit not find a way back to genesis.");
+            }
+            cursor = source.get(cursor.getBlock().getHashPrevBlock());
+        }
+        Block intervalStart = cursor.getBlock();
+        int timespan = (int)(prev.getnTime() - intervalStart.getnTime());
+        int targetTimespan = NetworkParameters.getNetworkParameters().targetTimespan;
+        // Limit the adjustment step.
+        if (timespan < targetTimespan / 4)
+            timespan = targetTimespan / 4;
+        if (timespan > targetTimespan * 4)
+            timespan = targetTimespan * 4;
+
+        BigInteger newnBits = Utils.decodeCompactBits(intervalStart.getnBits());
+        newnBits = newnBits.multiply(BigInteger.valueOf(timespan));
+        newnBits = newnBits.divide(BigInteger.valueOf(targetTimespan));
+
+        if (newnBits.compareTo(NetworkParameters.getNetworkParameters().proofOfWorkLimit) > 0) {
+            newnBits = NetworkParameters.getNetworkParameters().proofOfWorkLimit;
+        }
+
+        return Utils.encodeCompactBits(newnBits);
     }
 }
