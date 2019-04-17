@@ -69,7 +69,7 @@ public class PeerGroup {
                 try {
                     brocastBlcokInv(blockInv);
                 } catch (IOException e) {
-                    logger.error("Fail to broad Block Inv {}", blockInv);
+                    logger.error("Fail to broadcast Block Inv {}", blockInv);
                 }
             }
         };

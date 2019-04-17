@@ -74,7 +74,7 @@ public class BlockChain {
         }
 
         /** check the chain tip */
-        if (block.equals(chainTip)) {
+        if (block.equals(chainTip.getBlock())) {
             logger.debug("Chain tip {} has already been added!", block.getHash());
             return true;
         }
