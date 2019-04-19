@@ -29,8 +29,7 @@ public class BlockHeadTest {
     public void blockHeadSerializeTest() throws IOException {
         BlockHead block = new BlockHead(SHA256Hash.ZERO_HASH, 1, 2, 3);
         byte[] serializedData = block.serialize();
-        BlockHead other = new BlockHead();
-        other.deserialize(serializedData);
+        BlockHead other = BlockHead.deserialize(serializedData);
         assertEquals(block, other);
     }
 }

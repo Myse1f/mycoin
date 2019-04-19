@@ -74,9 +74,9 @@ public class NetworkParameters implements Serializable {
         n.interval = BLOCK_INTERVAL;
         n.targetTimespan = TARGET_TIMESPAN;
         n.genesisBlock = createGenesis();
-        n.genesisBlock.setnTime(0L); // TODO set genesis block time
-        n.genesisBlock.setnBits(0x1d07fff8L);
-        n.genesisBlock.setnNonce(0L); // dont care about nonce of genesis block
+        n.genesisBlock.setnTime(1555554791L); // Thu Apr 18 10:33:11 CST 2019
+        n.genesisBlock.setnBits(0x1d0fffff);
+        n.genesisBlock.setnNonce(112590263L); // dont care about nonce of genesis block
         n.id = ID_TESTNET;
     }
 

@@ -43,7 +43,7 @@ public class PeerGroup {
     private PeerEventListener downloadListener;
 
     /** can only be run once at the beginning */
-    private static void init(BlockChain chain) {
+    public static void init(BlockChain chain) {
         peerGroup = new PeerGroup(chain);
     }
 
@@ -104,7 +104,7 @@ public class PeerGroup {
         return msgs;
     }
 
-    public synchronized PeerGroup getInstance() {
+    public static synchronized PeerGroup getInstance() {
         if (peerGroup == null) {
             throw new RuntimeException("PeerGroup is not initialized.");
         }
@@ -154,6 +154,7 @@ public class PeerGroup {
         this.peerGroupThread = new PeerGroupThread();
         this.running = true;
         this.peerGroupThread.start();
+        logger.info("Peer network start working.");
     }
 
     public synchronized void stop() throws IOException {
@@ -343,6 +344,7 @@ public class PeerGroup {
 
         @Override
         public void run() {
+            logger.info("Listening in {}:{}", serverSocket.getInetAddress(), serverSocket.getLocalPort());
             try {
                 while (isRunning()) {
                     Socket socket = serverSocket.accept(); // block here to wait for a new inbound connection

@@ -112,7 +112,7 @@ public class Block extends BlockHead {
         StringBuffer s = new StringBuffer(" block: \n" + "   previous block: "
                 + hashPrevBlock.toString() + "\n"
                 + "   time: [" + nTime + "] " + new Date(nTime * 1000).toString() + "\n"
-                + "   difficulty target (nBits): " + nBits + "\n" + "   nonce: " + nNonce + "\n");
+                + "   difficulty target (nBits): 0x" + Long.toHexString(nBits) + "\n" + "   nonce: " + nNonce + "\n");
 
         return s.toString();
     }
