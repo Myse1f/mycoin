@@ -5,8 +5,6 @@
 package net;
 
 import core.Message;
-import core.MessageHeader;
-import core.Utils;
 import exception.ProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

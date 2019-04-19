@@ -7,10 +7,11 @@ package core;
 import exception.BlockPersistenceException;
 import exception.PeerException;
 import net.NetworkParameters;
-import net.PeerAddress;
 import net.TCPNetworkConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import utils.EventListenerInvoker;
 
 import java.io.IOException;
@@ -19,18 +20,20 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Maintain a list of peers. Manage the connection between peers.
  */
+@Component("PeerGroup")
 public class PeerGroup {
     private static final Logger logger = LoggerFactory.getLogger(PeerGroup.class);
     private static final int DEAFAULT_CONNECTIONS = 4; // limited by my machines number
     private static final int THREAD_KEEP_ALIVE_SECONDS = 1;
-
-    private static PeerGroup peerGroup; //singleton
 
     private Set<Peer> peers; // connected peers
     private Peer downloadPeer; // the peer where we
@@ -42,12 +45,8 @@ public class PeerGroup {
     private List<PeerEventListener> peerEventListeners;
     private PeerEventListener downloadListener;
 
-    /** can only be run once at the beginning */
-    public static void init(BlockChain chain) {
-        peerGroup = new PeerGroup(chain);
-    }
-
-    private PeerGroup(BlockChain chain) {
+    @Autowired
+    public PeerGroup(BlockChain chain) throws IOException {
         this.blockchain = chain;
         this.peers = Collections.synchronizedSet(new HashSet<>());
         this.peerEventListeners = new ArrayList<>();
@@ -73,6 +72,8 @@ public class PeerGroup {
                 }
             }
         };
+
+        start();
     }
 
     /**
@@ -102,13 +103,6 @@ public class PeerGroup {
             logger.error("Can't access block database.", e);
         }
         return msgs;
-    }
-
-    public static synchronized PeerGroup getInstance() {
-        if (peerGroup == null) {
-            throw new RuntimeException("PeerGroup is not initialized.");
-        }
-        return peerGroup;
     }
 
     /**

@@ -13,11 +13,14 @@ import java.math.BigInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * A miner is trying to solve the hash puzzle It travel all the possible nonce
  * until the PoW is reached or a new block tip is concatenated
  */
+@Component("Miner")
 public class Miner {
     private static Logger logger = LoggerFactory.getLogger(Miner.class);
 
@@ -27,6 +30,7 @@ public class Miner {
 
     private MinerThread miner;
 
+    @Autowired
     public Miner(BlockChain blockChain, PeerGroup peerGroup) {
         this.blockChain = blockChain;
         this.peerGroup = peerGroup;

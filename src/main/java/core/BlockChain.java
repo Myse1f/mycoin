@@ -9,6 +9,8 @@ import exception.VerificationException;
 import net.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import persistence.BlockPersistence;
 
 import java.math.BigInteger;
@@ -20,6 +22,7 @@ import java.util.List;
  * A BlockChain holds a series of {@link Block} objects, links them together, and knows how to verify that the
  * chain follows the rules of the {@link net.NetworkParameters} for this chain.<p>
  */
+@Component("BlockChain")
 public class BlockChain {
     private static final Logger logger = LoggerFactory.getLogger(BlockChain.class);
 
@@ -39,6 +42,7 @@ public class BlockChain {
     private final List<Block> unconnectedBlocks = new ArrayList<>();
 
     /** initialize with a block persistence database */
+    @Autowired
     public BlockChain(BlockPersistence blockPersistence) throws BlockPersistenceException {
         this.blockPersistence = blockPersistence;
         chainTip = blockPersistence.getChainTip();

@@ -4,24 +4,27 @@
  */
 package main;
 
-import core.BlockChain;
-import core.Miner;
-import core.PeerGroup;
 import exception.BlockPersistenceException;
 import net.NetworkParameters;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import persistence.BlockPersistence;
 import persistence.LevelDBBlockPersistence;
 
 import java.io.File;
 import java.io.IOException;
 
+@SpringBootApplication(scanBasePackages = {"core", "utils", "restapi"})
 public class Main {
-    public static void main(String[] args) throws BlockPersistenceException, IOException {
+
+    public static void main(String[] args) throws IOException {
         NetworkParameters.setNetworkParameters(NetworkParameters.ID_TESTNET);
-        BlockPersistence database = new LevelDBBlockPersistence(new File("data"));
-        BlockChain chain  = new BlockChain(database);
-        PeerGroup.init(chain);
-        PeerGroup.getInstance().start();
-        Miner miner = new Miner(chain, PeerGroup.getInstance());
+        SpringApplication.run(Main.class, args);
+    }
+
+    @Bean
+    public BlockPersistence levelDB() throws BlockPersistenceException {
+        return new LevelDBBlockPersistence(new File("data"));
     }
 }

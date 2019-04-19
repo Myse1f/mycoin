@@ -95,6 +95,7 @@ public class NetworkParameters implements Serializable {
     public static void setNetworkParameters(String id) {
         switch (id) {
             case ID_TESTNET:
+                logger.info("Test Net.");
                 createTestNet();
                 break;
             case ID_MAINNET:
