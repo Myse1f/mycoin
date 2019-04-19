@@ -9,7 +9,6 @@ import core.BlockHead;
 import core.SHA256Hash;
 import core.StoredBlock;
 import exception.BlockPersistenceException;
-import exception.ProtocolException;
 import exception.VerificationException;
 import net.NetworkParameters;
 import org.slf4j.Logger;

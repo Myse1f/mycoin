@@ -22,8 +22,6 @@ import java.net.Socket;
 public class TCPNetworkConnection implements NetworkConnection {
     private static final Logger logger = LoggerFactory.getLogger(TCPNetworkConnection.class);
 
-    private Message versionMessage;
-
     private final Socket socket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
@@ -40,19 +38,16 @@ public class TCPNetworkConnection implements NetworkConnection {
     }
 
     /**
-     * Connect to a given IP address and do the version handshake
-     * | version -> |
-     * | <- verback |
-     * | <- version |
-     * | verback -> |
+     * Connect to a given IP address and do the version handshake | version -> | |
+     * <- verback | | <- version | | verback -> |
+     * 
      * @param peerAddress
      * @param connectTimeoutMsec
      * @throws IOException
      */
-    public TCPNetworkConnection(PeerAddress peerAddress, int connectTimeoutMsec, Message versionMessage) throws IOException {
+    public TCPNetworkConnection(PeerAddress peerAddress, int connectTimeoutMsec, Message versionMessage)
+            throws IOException {
         this.peer = peerAddress;
-        this.versionMessage = versionMessage;
-
         int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : NetworkParameters.getNetworkParameters().port;
         InetSocketAddress address = new InetSocketAddress(peer.getAddr(), port);
         socket = new Socket();

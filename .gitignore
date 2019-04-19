@@ -8,4 +8,5 @@ bin/
 *.iml
 out/
 .vs
+.vscode
 data/

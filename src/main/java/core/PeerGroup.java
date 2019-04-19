@@ -74,6 +74,7 @@ public class PeerGroup {
         };
 
         start();
+        initialBlocksDownload();
     }
 
     /**
@@ -221,6 +222,7 @@ public class PeerGroup {
      * from at least one peer all the blocks that are in that peer's inventory.
      */
     private synchronized void initialBlocksDownload() {
+        logger.info("Initail blocks download.");
         synchronized (peers) {
             if (!peers.isEmpty()) {
                 downloadFromPeer(peers.iterator().next());

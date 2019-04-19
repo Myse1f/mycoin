@@ -4,14 +4,10 @@
  */
 package core;
 
-import exception.BlockPersistenceException;
-import exception.ProtocolException;
 import exception.VerificationException;
 import net.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import persistence.BlockPersistence;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Date;
