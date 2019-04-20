@@ -4,6 +4,7 @@
  */
 package core;
 
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -304,5 +305,29 @@ public class Utils {
         return result;
     }
 
+    /**
+     * convert a stored block to json object
+     */
+    public static JSONObject storedBlock2Json(StoredBlock block) {
+        JSONObject json = new JSONObject();
+        json.put("hash", block.getBlock().getHash().toString());
+        json.put("height", block.getHeight());
+        json.put("prevHash", block.getBlock().getHashPrevBlock().toString());
+        json.put("time", block.getBlock().getnTime());
+        json.put("nonce", block.getBlock().getnNonce());
 
+        return json;
+    }
+
+    /**
+     * convert a peer to json object
+     */
+    public static JSONObject peer2Json(Peer peer) {
+        JSONObject json = new JSONObject();
+        json.put("isRunning", peer.isRunning());
+        json.put("address", peer.getAddress().getAddr().getHostAddress());
+        json.put("port", peer.getAddress().getPort());
+
+        return json;
+    }
 }

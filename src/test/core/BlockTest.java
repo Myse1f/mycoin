@@ -19,7 +19,7 @@ public class BlockTest {
     public void getGenesisBlock() throws VerificationException, IOException {
         long now = System.currentTimeMillis() / 1000;
         NetworkParameters.setNetworkParameters(NetworkParameters.ID_TESTNET);
-        Block genesis = new Block(new BlockHead(SHA256Hash.ZERO_HASH, now, 0x1d0fffff, 0));
+        Block genesis = new Block(new BlockHead(SHA256Hash.ZERO_HASH, now, 0x1e0fffff, 0));
         int no = 0;
         BigInteger target = genesis.getnBitsAsInteger();
         while (true) {

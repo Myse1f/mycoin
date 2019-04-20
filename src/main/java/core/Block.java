@@ -105,8 +105,9 @@ public class Block extends BlockHead {
 
     @Override
     public String toString() {
-        StringBuffer s = new StringBuffer(" block: \n" + "   previous block: "
-                + hashPrevBlock.toString() + "\n"
+        StringBuffer s = new StringBuffer(" block: \n"
+                + "   hash: " + getHash().toString() + "\n"
+                + "   previous block: " + hashPrevBlock.toString() + "\n"
                 + "   time: [" + nTime + "] " + new Date(nTime * 1000).toString() + "\n"
                 + "   difficulty target (nBits): 0x" + Long.toHexString(nBits) + "\n" + "   nonce: " + nNonce + "\n");
 

@@ -113,7 +113,8 @@ public class Miner {
                 while (isWorking()) {
                     StoredBlock prevChainTip = blockChain.getChainTip();
                     Block template = createBlockTemplate(prevChainTip);
-                    template.setnTime(System.currentTimeMillis()/1000); // TODO in decenteralized system, the time need to be set smarter
+                    long now = System.currentTimeMillis()/1000;
+                    template.setnTime(now); // TODO in decenteralized system, the time need to be set smarter
                     template.setnNonce(0);
                     while (isWorking()) {
                         SHA256Hash hash = new SHA256Hash(Utils.reverseBytes(Utils.doubleDigest(Utils.objectsToByteArray((BlockHead)template))));
@@ -127,18 +128,21 @@ public class Miner {
 
                         long nonce = template.getnNonce();
                         if (nonce + 1 > 0xFFFFFFFFL) {
-                            // nNonce is overflow
+                            logger.info("Nonce overflow, reset block time.");
                             break;
                         }
-                        if (prevChainTip.equals(blockChain.getChainTip())) {
+                        if (!prevChainTip.equals(blockChain.getChainTip())) {
                             // chainTip is updated
                             break;
                         }
                         template.setnNonce(nonce + 1);
+                        if ((nonce + 1) % 0x00FFFFFFL == 0) {
+                            logger.info("Hash rate: {} hash/sec", nonce / ((System.currentTimeMillis()/1000 - now)));
+                        }
                     }
                 }
             } catch (Exception e) {
-                logger.error("Error in when mining, start shutdown miner.");
+                logger.error("Error in when mining, start shutdown miner. {}", e);
                 Miner.this.stop();
             }
         }

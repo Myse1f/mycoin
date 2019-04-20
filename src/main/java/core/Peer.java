@@ -399,7 +399,15 @@ public class Peer {
             // User-provided NetworkConnection object.
             return "Peer(NetworkConnection:" + connection + ")";
         } else {
-            return "Peer(" + address.getAddr() + ":" + address.getPort() + ")";
+            return "Peer(" + address.getAddr().getHostAddress() + ":" + address.getPort() + ")";
         }
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public PeerAddress getAddress() {
+        return address;
     }
 }

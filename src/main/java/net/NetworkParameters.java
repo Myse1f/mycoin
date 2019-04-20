@@ -69,14 +69,14 @@ public class NetworkParameters implements Serializable {
      */
     private static void createTestNet() {
         n = new NetworkParameters();
-        n.proofOfWorkLimit = new BigInteger("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+        n.proofOfWorkLimit = new BigInteger("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
         n.port = 23333;
         n.interval = BLOCK_INTERVAL;
         n.targetTimespan = TARGET_TIMESPAN;
         n.genesisBlock = createGenesis();
-        n.genesisBlock.setnTime(1555554791L); // Thu Apr 18 10:33:11 CST 2019
-        n.genesisBlock.setnBits(0x1d0fffff);
-        n.genesisBlock.setnNonce(112590263L); // dont care about nonce of genesis block
+        n.genesisBlock.setnTime(1555744764L); // Sat Apr 20 15:19:24 CST 2019
+        n.genesisBlock.setnBits(0x1e0fffff);
+        n.genesisBlock.setnNonce(427685L); // dont care about nonce of genesis block
         n.id = ID_TESTNET;
     }
 
