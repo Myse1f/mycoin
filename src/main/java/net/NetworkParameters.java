@@ -63,7 +63,7 @@ public class NetworkParameters implements Serializable {
         return new Block();
     }
 
-    private static final int TARGET_TIMESPAN = 24 * 60 * 60; // change difficulty every day
+    private static final int TARGET_TIMESPAN = 6 * 60 * 60; // change difficulty every 6 hours
     private static final int TARGET_SPACING = 5 * 60; // 5 minutes per block
     private static final int BLOCK_INTERVAL = TARGET_TIMESPAN / TARGET_SPACING; // change difficulty every 288 blocks
 
