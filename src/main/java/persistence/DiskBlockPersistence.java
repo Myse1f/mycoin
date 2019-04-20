@@ -13,6 +13,7 @@ import exception.VerificationException;
 import net.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.SpringContextUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -161,7 +162,7 @@ public class DiskBlockPersistence implements BlockPersistence {
             throw new BlockPersistenceException(e);
         }
         try {
-            Block genesis = NetworkParameters.getNetworkParameters().genesisBlock;
+            Block genesis = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).genesisBlock;
             StoredBlock storedBlock = new StoredBlock(genesis, genesis.getWork(), 0);
             this.chainTip = genesis.getHash();
             this.file.write(this.chainTip.getBytes());

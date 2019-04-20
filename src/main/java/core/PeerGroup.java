@@ -35,6 +35,8 @@ public class PeerGroup {
     private static final int DEAFAULT_CONNECTIONS = 4; // limited by my machines number
     private static final int THREAD_KEEP_ALIVE_SECONDS = 1;
 
+    private NetworkParameters params;
+
     private Set<Peer> peers; // connected peers
     private Peer downloadPeer; // the peer where we
     private BlockChain blockchain;
@@ -46,8 +48,9 @@ public class PeerGroup {
     private PeerEventListener downloadListener;
 
     @Autowired
-    public PeerGroup(BlockChain chain) throws IOException {
+    public PeerGroup(BlockChain chain, NetworkParameters params) throws IOException {
         this.blockchain = chain;
+        this.params = params;
         this.peers = Collections.synchronizedSet(new HashSet<>());
         this.peerEventListeners = new ArrayList<>();
         this.peerPool = new ThreadPoolExecutor(DEAFAULT_CONNECTIONS, DEAFAULT_CONNECTIONS, THREAD_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1), new PeerThreadFactory());
@@ -333,7 +336,7 @@ public class PeerGroup {
 
         public PeerGroupThread() throws IOException {
             super("PeerGroup Thread");
-            serverSocket = new ServerSocket(NetworkParameters.getNetworkParameters().port);
+            serverSocket = new ServerSocket((params.port));
             setPriority(Math.max(Thread.MIN_PRIORITY, Thread.currentThread().getPriority()-1));
             setDaemon(true);
         }

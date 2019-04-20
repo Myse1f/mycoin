@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 public class BlockHeadTest {
     @Before
     public void beforeTest() {
-        NetworkParameters.setNetworkParameters(NetworkParameters.ID_TESTNET);
+        //NetworkParameters.setNetworkParameters(NetworkParameters.ID_TESTNET);
     }
 
     @Test

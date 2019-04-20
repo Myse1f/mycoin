@@ -14,6 +14,7 @@ import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.SpringContextUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,7 +93,7 @@ public class LevelDBBlockPersistence implements BlockPersistence {
     private synchronized void initStoreIfNeeded() throws BlockPersistenceException, VerificationException {
         if (db.get(CHAIN_TIP_KEY) != null)
             return;   // Already initialised.
-        Block genesis = NetworkParameters.getNetworkParameters().genesisBlock;
+        Block genesis = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).genesisBlock;
         StoredBlock storedGenesis = new StoredBlock(genesis, genesis.getWork(), 0);
         put(storedGenesis);
         setChainTip(storedGenesis);

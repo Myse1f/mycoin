@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import persistence.BlockPersistence;
+import utils.SpringContextUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ public class BlockChain {
     /** the persistence database of block file */
     protected final BlockPersistence blockPersistence;
 
+    private NetworkParameters params;
+
     /** The tip block of the chain */
     protected StoredBlock chainTip;
 
@@ -43,8 +46,9 @@ public class BlockChain {
 
     /** initialize with a block persistence database */
     @Autowired
-    public BlockChain(BlockPersistence blockPersistence) throws BlockPersistenceException {
+    public BlockChain(BlockPersistence blockPersistence, NetworkParameters params) throws BlockPersistenceException {
         this.blockPersistence = blockPersistence;
+        this.params = params;
         chainTip = blockPersistence.getChainTip();
         logger.info("chain tip is at height {}:\n{}", chainTip.getHeight(), chainTip.getBlock());
     }
@@ -123,7 +127,7 @@ public class BlockChain {
     private void checkDifficultAdaption(StoredBlock prevBlock, StoredBlock newBlock) throws VerificationException, BlockPersistenceException {
         Block prev = prevBlock.getBlock();
         Block current = newBlock.getBlock();
-        int blocksInterval = NetworkParameters.getNetworkParameters().interval;
+        int blocksInterval = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).interval;
         // check interval
         if ((prevBlock.getHeight() + 1) % blocksInterval != 0) {
             // don't change difficulty, check consistency
@@ -145,7 +149,7 @@ public class BlockChain {
 
         Block intervalStart = cursor.getBlock();
         int timespan = (int)(prev.getnTime() - intervalStart.getnTime());
-        int targetTimespan = NetworkParameters.getNetworkParameters().targetTimespan;
+        int targetTimespan = params.targetTimespan;
         // Limit the adjustment step.
         if (timespan < targetTimespan / 4)
             timespan = targetTimespan / 4;
@@ -156,9 +160,9 @@ public class BlockChain {
         newnBits = newnBits.multiply(BigInteger.valueOf(timespan));
         newnBits = newnBits.divide(BigInteger.valueOf(targetTimespan));
 
-        if (newnBits.compareTo(NetworkParameters.getNetworkParameters().proofOfWorkLimit) > 0) {
+        if (newnBits.compareTo(params.proofOfWorkLimit) > 0) {
             logger.debug("Difficulty hit proof of work limit: {}", newnBits.toString(16));
-            newnBits = NetworkParameters.getNetworkParameters().proofOfWorkLimit;
+            newnBits = params.proofOfWorkLimit;
         }
 
         int accuracyBytes = (int)(current.getnBits() >>> 24) - 3;

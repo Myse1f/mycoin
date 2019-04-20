@@ -9,6 +9,7 @@ import exception.ProtocolException;
 import exception.VerificationException;
 import net.NetworkParameters;
 import persistence.BlockPersistence;
+import utils.SpringContextUtil;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -152,7 +153,7 @@ public class StoredBlock implements Serializable {
      */
     public static long getNextnBits(StoredBlock prevBlock, BlockPersistence source) throws BlockPersistenceException, ProtocolException {
         Block prev = prevBlock.getBlock();
-        int blocksInterval = NetworkParameters.getNetworkParameters().interval;
+        int blocksInterval = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).interval;
         // check interval
         if ((prevBlock.getHeight() + 1) % blocksInterval != 0) {
             return prev.getnBits();
@@ -167,7 +168,7 @@ public class StoredBlock implements Serializable {
         }
         Block intervalStart = cursor.getBlock();
         int timespan = (int)(prev.getnTime() - intervalStart.getnTime());
-        int targetTimespan = NetworkParameters.getNetworkParameters().targetTimespan;
+        int targetTimespan = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).targetTimespan;
         // Limit the adjustment step.
         if (timespan < targetTimespan / 4)
             timespan = targetTimespan / 4;
@@ -178,8 +179,8 @@ public class StoredBlock implements Serializable {
         newnBits = newnBits.multiply(BigInteger.valueOf(timespan));
         newnBits = newnBits.divide(BigInteger.valueOf(targetTimespan));
 
-        if (newnBits.compareTo(NetworkParameters.getNetworkParameters().proofOfWorkLimit) > 0) {
-            newnBits = NetworkParameters.getNetworkParameters().proofOfWorkLimit;
+        if (newnBits.compareTo(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).proofOfWorkLimit) > 0) {
+            newnBits = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).proofOfWorkLimit;
         }
 
         return Utils.encodeCompactBits(newnBits);

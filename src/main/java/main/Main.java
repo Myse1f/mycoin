@@ -28,8 +28,12 @@ import java.io.IOException;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        NetworkParameters.setNetworkParameters(NetworkParameters.ID_TESTNET);
         SpringApplication.run(Main.class, args);
+    }
+
+    @Bean("network_params")
+    public NetworkParameters testNet() {
+        return new NetworkParameters(NetworkParameters.ID_TESTNET);
     }
 
     @Bean

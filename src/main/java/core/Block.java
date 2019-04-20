@@ -8,6 +8,8 @@ import exception.VerificationException;
 import net.NetworkParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.SpringContextUtil;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Date;
@@ -88,7 +90,7 @@ public class Block extends BlockHead {
 
     public BigInteger getnBitsAsInteger() throws VerificationException {
         BigInteger target = Utils.decodeCompactBits(nBits);
-        if (target.compareTo(BigInteger.valueOf(0)) <= 0 || target.compareTo(NetworkParameters.getNetworkParameters().proofOfWorkLimit) > 0) {
+        if (target.compareTo(BigInteger.valueOf(0)) <= 0 || target.compareTo(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).proofOfWorkLimit) > 0) {
             throw new VerificationException("nBits is error: " + target.toString());
         }
         return target;

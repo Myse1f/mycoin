@@ -6,6 +6,7 @@ package net;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.SpringContextUtil;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -32,7 +33,7 @@ public class PeerAddress implements Serializable {
     }
 
     public PeerAddress(InetAddress addr) {
-        this(addr, NetworkParameters.getNetworkParameters().port);
+        this(addr, ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).port);
     }
 
     public PeerAddress(InetSocketAddress addr) {

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.BlockPersistence;
 import utils.EventListenerInvoker;
+import utils.SpringContextUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -334,7 +335,7 @@ public class Peer {
             }
         }
         if (cursor != null) {
-            blockLocator.add(NetworkParameters.getNetworkParameters().genesisBlock.getHash());
+            blockLocator.add(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).genesisBlock.getHash());
         }
 
         Message getBlocksMessage = createGetBlocksMessage(blockLocator, hashStop);

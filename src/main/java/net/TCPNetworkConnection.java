@@ -8,6 +8,9 @@ import core.Message;
 import exception.ProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import utils.SpringContextUtil;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -48,7 +51,7 @@ public class TCPNetworkConnection implements NetworkConnection {
     public TCPNetworkConnection(PeerAddress peerAddress, int connectTimeoutMsec, Message versionMessage)
             throws IOException {
         this.peer = peerAddress;
-        int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : NetworkParameters.getNetworkParameters().port;
+        int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).port;
         InetSocketAddress address = new InetSocketAddress(peer.getAddr(), port);
         socket = new Socket();
         socket.connect(address, connectTimeoutMsec);
