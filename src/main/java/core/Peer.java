@@ -250,6 +250,7 @@ public class Peer {
      * Stop the peer network and disconnect from remote peer
      */
     public void disconnect() {
+        logger.info("Disconnect from peer {}", this);
         running = false;
         try {
             // This is the correct way to stop an IO bound loop

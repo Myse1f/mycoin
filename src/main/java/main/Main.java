@@ -5,13 +5,10 @@
 package main;
 
 import com.google.common.collect.Sets;
-import exception.BlockPersistenceException;
 import net.NetworkParameters;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import persistence.BlockPersistence;
-import persistence.LevelDBBlockPersistence;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -20,7 +17,6 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.io.File;
 import java.io.IOException;
 
 @SpringBootApplication(scanBasePackages = {"core", "utils", "restapi", "persistence"})

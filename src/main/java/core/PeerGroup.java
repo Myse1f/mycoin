@@ -193,7 +193,7 @@ public class PeerGroup {
                         }
                         peers.add(peer);
                     }
-                    new Thread(() ->handleNewPeer(peer)).start();
+                    new Thread(() -> handleNewPeer(peer)).start();
                     peer.run(); // infinite loop here, process message
                 } catch (PeerException e) {
                     final Throwable cause = e.getCause();
@@ -318,7 +318,7 @@ public class PeerGroup {
      * @param peer
      */
     private synchronized void handleNewPeer(Peer peer) {
-        logger.info("Handing new peer {}", peer);
+        logger.info("Handling new peer {}", peer);
         // download the chain if we never do it
         if (downloadListener != null && downloadPeer == null) {
             logger.info("   starting downloading blocks.");
