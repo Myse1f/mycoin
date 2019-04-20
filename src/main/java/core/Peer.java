@@ -252,6 +252,7 @@ public class Peer {
     public void disconnect() {
         logger.info("Disconnect from peer {}", this);
         running = false;
+        versionLock.countDown();
         try {
             // This is the correct way to stop an IO bound loop
             if (connection != null)
@@ -353,7 +354,7 @@ public class Peer {
 
     private Message createVersionMessage() throws IOException {
         Message versionMessage = new Message(MessageHeader.VERSION, 0, null);
-        byte[] payload = Utils.objectsToByteArray(Utils.objectsToByteArray(blockChain.chainTip.getHeight()));
+        byte[] payload = Utils.objectsToByteArray(blockChain.chainTip.getHeight());
         versionMessage.setMessageSize(payload.length);
         versionMessage.setPayload(payload);
         return versionMessage;

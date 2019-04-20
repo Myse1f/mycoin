@@ -38,5 +38,12 @@ public class MessageTest {
         assertEquals(invs, invs1);
     }
 
-
+    @Test
+    public void intMessageTest() {
+        Message msg = new Message("version", 0, null);
+        int integer = 10;
+        msg.setPayload(Utils.objectsToByteArray(integer));
+        int other = msg.getPayloadAsInteger();
+        assertEquals(integer, other);
+    }
 }
