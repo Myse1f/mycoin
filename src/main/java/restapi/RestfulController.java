@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -181,6 +182,78 @@ public class RestfulController {
             data.put("status", "stop");
         }
         result.setData(data);
+
+        return result;
+    }
+
+    @GetMapping("/network")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "获得网络状态", notes = "获得网络状态")
+    public Result getNetworkStatus() {
+        Result result = new Result();
+        JSONObject data = new JSONObject();
+
+        result.setCode(Result.ResultCode.SUCCESS.getCode());
+        result.setMessage(Result.ResultCode.SUCCESS.getErrMsg());
+        if (network.isRunning()) {
+            data.put("status", "running");
+        } else {
+            data.put("status", "stop");
+        }
+        result.setData(data);
+
+
+        return result;
+    }
+
+    @PatchMapping("/network")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "启动网络", notes = "启动网络")
+    public Result startNetwork() {
+        Result result = new Result();
+        JSONObject data = new JSONObject();
+
+        try {
+            network.start();
+            result.setCode(Result.ResultCode.SUCCESS.getCode());
+            result.setMessage(Result.ResultCode.SUCCESS.getErrMsg());
+            if (network.isRunning()) {
+                data.put("status", "running");
+            } else {
+                data.put("status", "stop");
+            }
+            result.setData(data);
+        } catch (IOException e) {
+            logger.error("Peer network has some problem. {}", e);
+            result.setCode(Result.ResultCode.EXCEPTION.getCode());
+            result.setMessage(Result.ResultCode.EXCEPTION.getErrMsg());
+        }
+
+        return result;
+    }
+
+    @DeleteMapping("/network")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "停止网络", notes = "停止网络")
+    public Result stopNetwork() {
+        Result result = new Result();
+        JSONObject data = new JSONObject();
+
+        try {
+            network.stop();
+            result.setCode(Result.ResultCode.SUCCESS.getCode());
+            result.setMessage(Result.ResultCode.SUCCESS.getErrMsg());
+            if (network.isRunning()) {
+                data.put("status", "running");
+            } else {
+                data.put("status", "stop");
+            }
+            result.setData(data);
+        } catch (IOException e) {
+            logger.error("Peer network has some problem. {}", e);
+            result.setCode(Result.ResultCode.EXCEPTION.getCode());
+            result.setMessage(Result.ResultCode.EXCEPTION.getErrMsg());
+        }
 
         return result;
     }

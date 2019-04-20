@@ -149,10 +149,14 @@ public class PeerGroup {
     }
 
     public synchronized void start() throws IOException {
-        this.peerGroupThread = new PeerGroupThread();
-        this.running = true;
-        this.peerGroupThread.start();
-        logger.info("Peer network start working.");
+        if (!isRunning()) {
+            this.peerGroupThread = new PeerGroupThread();
+            this.running = true;
+            this.peerGroupThread.start();
+            logger.info("Peer network start working.");
+        } else {
+            logger.info("Peer network has already started.");
+        }
     }
 
     public synchronized void stop() throws IOException {
@@ -252,6 +256,10 @@ public class PeerGroup {
      * broadcast block Inv to all peers
      */
     public void brocastBlcokInv(Inv blockInv) throws IOException {
+        if (!isRunning()) {
+            logger.info("PeerGroup is not working. Thus not broadcast block inv.");
+            return;
+        }
         synchronized (peers) {
             for (Peer peer : peers) {
                 if (!peer.isInvKown(blockInv)) {
@@ -361,6 +369,7 @@ public class PeerGroup {
                 synchronized (peers) {
                     for (Peer peer : peers) {
                         peer.disconnect();
+                        peers.remove(peer);
                     }
                 }
             }
