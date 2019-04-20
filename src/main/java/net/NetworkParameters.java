@@ -65,7 +65,7 @@ public class NetworkParameters implements Serializable {
 
     private static final int TARGET_TIMESPAN = 12 * 60 * 60; // change difficulty every 6 hours
     private static final int TARGET_SPACING = 5 * 60; // 5 minutes per block
-    private static final int BLOCK_INTERVAL = TARGET_TIMESPAN / TARGET_SPACING; // change difficulty every 288 blocks
+    private static final int BLOCK_INTERVAL = TARGET_TIMESPAN / TARGET_SPACING; // change difficulty every 144 blocks
 
     /**
      * setup the parameters of test net
