@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A {@link Peer} handlers the high level communication with other nodes
@@ -43,7 +44,8 @@ public class Peer {
     private Set<Inv> invKonwn = new HashSet<>();
     private List<PeerEventListener> eventListeners;
 
-    private int versionHeight = -1; // height in version message from this peer
+    private int versionHeight = 0; // height in version message from this peer
+    private CountDownLatch versionLock = new CountDownLatch(1); // lock until version message is received
 
     /**
      * construct a peer that uses peer address, then call connect() to connect to it
@@ -161,6 +163,7 @@ public class Peer {
     }
 
     private void processVerbackMessage() {
+        versionLock.countDown();
         logger.info("Connect to peer: {}", this);
     }
 
@@ -270,8 +273,8 @@ public class Peer {
      * get the height difference between this peer and ours
      */
     public int getChainHeightDifference() throws PeerException {
-        if (versionHeight <= 0) {
-            throw new PeerException("Connected to a peer with zero/negative chain height.");
+        if (versionHeight < 0) {
+            throw new PeerException("Connected to a peer with negative chain height.");
         }
         return versionHeight - blockChain.getChainHeight();
     }
@@ -293,7 +296,8 @@ public class Peer {
      * Start blocks download from this peer. We need height to get the blocks number to download
      * @throws IOException
      */
-    public void startBlocksDownload() throws IOException, PeerException {
+    public void startBlocksDownload() throws IOException, PeerException, InterruptedException {
+        versionLock.await();
         if (getChainHeightDifference() >= 0) {
             EventListenerInvoker.invoke(eventListeners, new EventListenerInvoker<PeerEventListener>() {
                 @Override

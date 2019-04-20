@@ -245,7 +245,7 @@ public class PeerGroup {
             peer.addEventListener(downloadListener);
             setDownloadPeer(peer);
             peer.startBlocksDownload();
-        } catch (IOException e) {
+        } catch (IOException|InterruptedException e) {
             logger.error("Fail to start blocks download from peer {}", peer);
         } catch (PeerException e) {
             logger.error("Peer has some error, {}", e);
