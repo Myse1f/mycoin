@@ -353,9 +353,7 @@ public class Peer {
 
     private Message createVersionMessage() throws IOException {
         Message versionMessage = new Message(MessageHeader.VERSION, 0, null);
-        byte[] payload = Utils.objectsToByteArray(
-                new Message(MessageHeader.VERSION, Integer.BYTES + MessageHeader.SIZE, Utils.objectsToByteArray(blockChain.chainTip.getHeight()))
-        );
+        byte[] payload = Utils.objectsToByteArray(Utils.objectsToByteArray(blockChain.chainTip.getHeight()));
         versionMessage.setMessageSize(payload.length);
         versionMessage.setPayload(payload);
         return versionMessage;
