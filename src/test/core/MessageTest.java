@@ -39,7 +39,7 @@ public class MessageTest {
     }
 
     @Test
-    public void intMessageTest() {
+    public void intMessageTest() throws IOException, ClassNotFoundException {
         Message msg = new Message("version", 0, null);
         int integer = 10;
         msg.setPayload(Utils.objectsToByteArray(integer));

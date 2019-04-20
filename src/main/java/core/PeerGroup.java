@@ -319,13 +319,6 @@ public class PeerGroup {
      */
     private synchronized void handleNewPeer(Peer peer) {
         logger.info("Handling new peer {}", peer);
-        // download the chain if we never do it
-        if (downloadListener != null && downloadPeer == null) {
-            logger.info("   starting downloading blocks.");
-            downloadFromPeer(peer);
-        } else if (downloadPeer == null) {
-            setDownloadPeer(peer);
-        }
         peer.addEventListener(getDataListener);
         EventListenerInvoker.invoke(peerEventListeners, new EventListenerInvoker<PeerEventListener>() {
             @Override
@@ -333,7 +326,13 @@ public class PeerGroup {
                 listener.onPeerConnected(peer, peers.size());
             }
         });
-
+        // download the chain if we never do it
+        if (downloadListener != null && downloadPeer == null) {
+            logger.info("   starting downloading blocks.");
+            downloadFromPeer(peer);
+        } else if (downloadPeer == null) {
+            setDownloadPeer(peer);
+        }
     }
 
     /**

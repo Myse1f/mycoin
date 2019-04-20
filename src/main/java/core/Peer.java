@@ -117,7 +117,7 @@ public class Peer {
                         processVersionMessage(m);
                     } else if(cmd.equals(MessageHeader.VERBACK)) {
                         processVerbackMessage();
-                    } else if (versionHeight <= 0) {
+                    } else if (versionHeight < 0) {
                         throw new ProtocolException("Version height need to be set before further communication.");
                     } else if(cmd.equals(MessageHeader.INV)) {
                         processInvMessgae(m);
@@ -231,7 +231,7 @@ public class Peer {
         for (PeerEventListener listener : eventListeners) {
             synchronized (listener) {
                 List<Message> data = listener.getData(this, msg);
-                if (data.isEmpty()) {
+                if (data == null || data.isEmpty()) {
                     continue;
                 }
                 requestData.addAll(data);
