@@ -23,7 +23,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.io.File;
 import java.io.IOException;
 
-@SpringBootApplication(scanBasePackages = {"core", "utils", "restapi"})
+@SpringBootApplication(scanBasePackages = {"core", "utils", "restapi", "persistence"})
 @EnableSwagger2
 public class Main {
 
@@ -34,11 +34,6 @@ public class Main {
     @Bean("network_params")
     public NetworkParameters testNet() {
         return new NetworkParameters(NetworkParameters.ID_TESTNET);
-    }
-
-    @Bean
-    public BlockPersistence levelDB() throws BlockPersistenceException {
-        return new LevelDBBlockPersistence(new File("data"));
     }
 
     @Bean

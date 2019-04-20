@@ -14,6 +14,8 @@ import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import utils.SpringContextUtil;
 
 import java.io.File;
@@ -28,13 +30,16 @@ import java.util.Set;
  * LevelDB based block persistence
  * Use memory to cache recently used blocks
  */
+@Component
 public class LevelDBBlockPersistence implements BlockPersistence {
     private static final Logger logger = LoggerFactory.getLogger(LevelDBBlockPersistence.class);
     private static final byte[] CHAIN_TIP_KEY = "chainTip".getBytes();
 
+    private NetworkParameters params;
+
     private DB db;
     private ByteBuffer buf = ByteBuffer.allocate(StoredBlock.SIZE);
-    private File path;
+    private static File path = new File("data");
 
     /**
      * Keep the cache of block into memory for up to 2050 blocks. It can help to optimize some cases where we are looking up
@@ -57,14 +62,11 @@ public class LevelDBBlockPersistence implements BlockPersistence {
         }
     });
 
-    /** Creates a LevelDB block store using the JNI/C++ version of LevelDB. */
-    public LevelDBBlockPersistence(File directory) throws BlockPersistenceException {
-        this(directory, JniDBFactory.factory);
-    }
-
     /** Creates a LevelDB block store using the given factory */
-    public LevelDBBlockPersistence(File directory, DBFactory dbFactory) throws BlockPersistenceException {
-        this.path = directory;
+    @Autowired
+    public LevelDBBlockPersistence(NetworkParameters params) throws BlockPersistenceException {
+        this.params = params;
+        DBFactory dbFactory = JniDBFactory.factory;
         if (!path.exists()) {
             path.mkdir();
         }
@@ -72,11 +74,11 @@ public class LevelDBBlockPersistence implements BlockPersistence {
         options.createIfMissing();
 
         try {
-            tryOpen(directory, dbFactory, options);
+            tryOpen(path, dbFactory, options);
         } catch (IOException | VerificationException e) {
             try {
-                dbFactory.repair(directory, options);
-                tryOpen(directory, dbFactory, options);
+                dbFactory.repair(path, options);
+                tryOpen(path, dbFactory, options);
             } catch (IOException | VerificationException e1) {
                 throw new BlockPersistenceException(e1);
             }
@@ -93,7 +95,7 @@ public class LevelDBBlockPersistence implements BlockPersistence {
     private synchronized void initStoreIfNeeded() throws BlockPersistenceException, VerificationException {
         if (db.get(CHAIN_TIP_KEY) != null)
             return;   // Already initialised.
-        Block genesis = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).genesisBlock;
+        Block genesis = params.genesisBlock;
         StoredBlock storedGenesis = new StoredBlock(genesis, genesis.getWork(), 0);
         put(storedGenesis);
         setChainTip(storedGenesis);

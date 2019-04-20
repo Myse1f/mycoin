@@ -90,7 +90,7 @@ public class Block extends BlockHead {
 
     public BigInteger getnBitsAsInteger() throws VerificationException {
         BigInteger target = Utils.decodeCompactBits(nBits);
-        if (target.compareTo(BigInteger.valueOf(0)) <= 0 || target.compareTo(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).proofOfWorkLimit) > 0) {
+        if (target.compareTo(BigInteger.valueOf(0)) <= 0) {
             throw new VerificationException("nBits is error: " + target.toString());
         }
         return target;
@@ -99,7 +99,7 @@ public class Block extends BlockHead {
     public boolean verifyBlock() throws VerificationException {
         BigInteger target = getnBitsAsInteger();
         BigInteger current = getHash().toBigInteger();
-        if (current.compareTo(target) > 0) {
+        if (current.compareTo(target) > 0 || target.compareTo(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).proofOfWorkLimit) > 0) {
             return false;
         }
         return true;
