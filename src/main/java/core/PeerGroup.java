@@ -193,7 +193,7 @@ public class PeerGroup {
                         }
                         peers.add(peer);
                     }
-                    handleNewPeer(peer);
+                    new Thread(() ->handleNewPeer(peer)).start();
                     peer.run(); // infinite loop here, process message
                 } catch (PeerException e) {
                     final Throwable cause = e.getCause();
