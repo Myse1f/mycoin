@@ -63,7 +63,7 @@ public class NetworkParameters implements Serializable {
         return new Block();
     }
 
-    private static final int TARGET_TIMESPAN = 6 * 60 * 60; // change difficulty every 6 hours
+    private static final int TARGET_TIMESPAN = 12 * 60 * 60; // change difficulty every 6 hours
     private static final int TARGET_SPACING = 5 * 60; // 5 minutes per block
     private static final int BLOCK_INTERVAL = TARGET_TIMESPAN / TARGET_SPACING; // change difficulty every 288 blocks
 
@@ -72,14 +72,14 @@ public class NetworkParameters implements Serializable {
      * @return the corresponding network parameters
      */
     private void createTestNet() {
-        proofOfWorkLimit = new BigInteger("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+        proofOfWorkLimit = new BigInteger("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
         port = 23333;
         interval = BLOCK_INTERVAL;
         targetTimespan = TARGET_TIMESPAN;
         genesisBlock = createGenesis();
-        genesisBlock.setnTime(1555744764L); // Sat Apr 20 15:19:24 CST 2019
-        genesisBlock.setnBits(0x1e0fffff);
-        genesisBlock.setnNonce(427685L); // dont care about nonce of genesis block
+        genesisBlock.setnTime(1555754576L); // Sat Apr 20 18:02:56 CST 2019
+        genesisBlock.setnBits(0x1e00ffffL);
+        genesisBlock.setnNonce(60824459L); // dont care about nonce of genesis block
         id = ID_TESTNET;
     }
 

@@ -7,6 +7,7 @@ package core;
 import exception.VerificationException;
 import net.NetworkParameters;
 import org.junit.Test;
+import utils.SpringContextUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -18,8 +19,8 @@ public class BlockTest {
     @Test
     public void getGenesisBlock() throws VerificationException, IOException {
         long now = System.currentTimeMillis() / 1000;
-        //NetworkParameters.setNetworkParameters(NetworkParameters.ID_TESTNET);
-        Block genesis = new Block(new BlockHead(SHA256Hash.ZERO_HASH, now, 0x1e0fffff, 0));
+        NetworkParameters params = new NetworkParameters(NetworkParameters.ID_TESTNET);
+        Block genesis = new Block(new BlockHead(SHA256Hash.ZERO_HASH, now, 0x1e00ffff, 0));
         int no = 0;
         BigInteger target = genesis.getnBitsAsInteger();
         while (true) {
@@ -44,13 +45,13 @@ public class BlockTest {
         }
         System.out.println(genesis);
         System.out.println(now);
-//        System.out.println(Long.toHexString(Utils.encodeCompactBits(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).proofOfWorkLimit)));
-//        System.out.println(Long.toHexString(Utils.encodeCompactBits(Utils.decodeCompactBits(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).genesisBlock.nBits))));
+        System.out.println(Long.toHexString(Utils.encodeCompactBits((params.proofOfWorkLimit))));
+        System.out.println(Long.toHexString(Utils.encodeCompactBits(Utils.decodeCompactBits(params.genesisBlock.nBits))));
     }
 
     @Test
     public void genesisBlockTest() throws VerificationException {
-//        NetworkParameters.setNetworkParameters(NetworkParameters.ID_TESTNET);
-//        assertTrue(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).genesisBlock.verifyBlock());
+        NetworkParameters params = new NetworkParameters(NetworkParameters.ID_TESTNET);
+        assertTrue(params.genesisBlock.verifyBlock());
     }
 }
