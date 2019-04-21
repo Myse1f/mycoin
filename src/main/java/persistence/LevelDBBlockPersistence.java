@@ -108,6 +108,7 @@ public class LevelDBBlockPersistence implements BlockPersistence {
             block.serialize(buf);
             db.put(block.getBlock().getHash().getBytes(), buf.array());
             blockCache.put(block.getBlock().getHash(), block);
+            notFoundCache.remove(block.getBlock().getHash());
         } catch (IOException e) {
             throw new BlockPersistenceException(e);
         }

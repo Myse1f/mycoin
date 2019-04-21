@@ -15,9 +15,7 @@ import persistence.BlockPersistence;
 import utils.SpringContextUtil;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A BlockChain holds a series of {@link Block} objects, links them together, and knows how to verify that the
@@ -36,6 +34,11 @@ public class BlockChain {
     protected StoredBlock chainTip;
 
     /**
+     * cahce for main chain block
+     */
+//    private Set<SHA256Hash> mainChainBlocks;
+
+    /**
      * chainHead is accessed under this lock rather than the BlockChain lock. This is to try and keep accessors
      * responsive whilst the chain is downloading
      */
@@ -49,7 +52,16 @@ public class BlockChain {
     public BlockChain(BlockPersistence blockPersistence, NetworkParameters params) throws BlockPersistenceException {
         this.blockPersistence = blockPersistence;
         this.params = params;
-        chainTip = blockPersistence.getChainTip();
+        this.chainTip = blockPersistence.getChainTip();
+
+//        this.mainChainBlocks = new HashSet<>();
+//        // initialize cache, it may need a little time
+//        logger.info("Initializing index of main chain block... It may need a some time");
+//        for (StoredBlock cursor = chainTip; cursor != null; cursor = cursor.getPreviousBlock(this.blockPersistence)) {
+//            mainChainBlocks.add(cursor.getBlock().getHash());
+//        }
+//        logger.info("Initialize Finished!");
+
         logger.info("chain tip is at height {}:\n{}", chainTip.getHeight(), chainTip.getBlock());
     }
 
@@ -182,11 +194,12 @@ public class BlockChain {
      */
     private void connectBlock(StoredBlock newBlock, StoredBlock prevBlock) throws BlockPersistenceException {
         if (prevBlock.equals(chainTip)) {
-            // a new tip, first set the tip's next field
+            // a new block, first set the prevblock's next field
             chainTip.setNext(newBlock.getBlock().getHash());
             blockPersistence.put(chainTip);
             // set new chain tip
             setChainTip(newBlock);
+//            mainChainBlocks.add(newBlock.getBlock().getHash());
             logger.debug("Chain height is now {}.", chainTip.getHeight());
         } else {
             // not a tip
@@ -260,13 +273,46 @@ public class BlockChain {
         } while (blockConnected > 0);
     }
 
+    /**
+     * re-organize the block, set and unset the next field
+     */
     private void handleReOrganize(StoredBlock newBlock) throws BlockPersistenceException {
         StoredBlock splitPoint = findSplit(newBlock, chainTip);
+
+        List<StoredBlock> oldBlocks = getPartialChain(chainTip, splitPoint);
+        List<StoredBlock> newBlocks = getPartialChain(newBlock, splitPoint);
+        for (StoredBlock block : oldBlocks) {
+            block.setNext(SHA256Hash.ZERO_HASH);
+            blockPersistence.put(block);
+        }
+        for (int i = 1; i < newBlocks.size(); i++) {
+            StoredBlock block = newBlocks.get(i);
+            block.setNext(newBlocks.get(i-1).getBlock().getHash());
+            blockPersistence.put(block);
+        }
         logger.info("Re-organize after split at height {}", splitPoint.getHeight());
         logger.info("Old chain head: {}", chainTip.getBlock().getHash().toString());
         logger.info("New chain head: {}", newBlock.getBlock().getHash().toString());
         logger.info("Split at block: {}", splitPoint.getBlock().getHash().toString());
         setChainTip(newBlock);
+    }
+
+    /**
+     * Returns the set of contiguous blocks between 'higher' and 'lower'. lower is included, higher is not.
+     */
+    private List<StoredBlock> getPartialChain(StoredBlock higher, StoredBlock lower) throws BlockPersistenceException {
+        assert higher.getHeight() > lower.getHeight();
+        LinkedList<StoredBlock> results = new LinkedList<>();
+        StoredBlock cursor = higher.getPreviousBlock(blockPersistence);
+        while (true) {
+            results.add(cursor);
+            assert cursor != null : "Ran off the end of the chain";
+            if (cursor.equals(lower)) {
+                break;
+            }
+            cursor = cursor.getPreviousBlock(blockPersistence);
+        }
+        return results;
     }
 
     public StoredBlock getChainTip() {
@@ -286,8 +332,17 @@ public class BlockChain {
         return getChainTip().getHeight();
     }
 
+    /**
+     * if the block in the database
+     */
     public boolean hasBlock(SHA256Hash hash) throws BlockPersistenceException {
         return blockPersistence.get(hash) != null;
     }
 
+    /**
+     * If the block in the main chain
+     */
+    public boolean isMainBlock(SHA256Hash hash) throws BlockPersistenceException {
+        return !blockPersistence.get(hash).getNext().equals(SHA256Hash.ZERO_HASH);
+    }
 }

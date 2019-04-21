@@ -207,7 +207,7 @@ public class Peer {
         StoredBlock locatedBlock = null;
         for (SHA256Hash hash : locator) {
             // find the block where we first have
-            if (blockChain.hasBlock(hash)) {
+            if (blockChain.isMainBlock(hash)) {
                 locatedBlock = blockChain.getBlockPersistence().get(hash);
                 break;
             }
