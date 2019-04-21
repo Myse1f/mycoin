@@ -341,8 +341,11 @@ public class BlockChain {
 
     /**
      * If the block in the main chain
+     * The next filed is zero or the chain tip
      */
     public boolean isMainBlock(SHA256Hash hash) throws BlockPersistenceException {
+        if (chainTip.getBlock().getHash().equals(hash))
+            return true;
         if (!hasBlock(hash))
             return false;
         return !blockPersistence.get(hash).getNext().equals(SHA256Hash.ZERO_HASH);
