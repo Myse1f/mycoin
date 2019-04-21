@@ -52,16 +52,6 @@ public class LevelDBBlockPersistence implements BlockPersistence {
         }
     };
 
-    /**
-     * Keep the cache of not found block to track get() miss
-     */
-    private Set<SHA256Hash> notFoundCache = Collections.newSetFromMap(new LinkedHashMap<SHA256Hash, Boolean>() {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<SHA256Hash, Boolean> entry) {
-            return size() > 100;
-        }
-    });
-
     /** Creates a LevelDB block store using the given factory */
     @Autowired
     public LevelDBBlockPersistence(NetworkParameters params) throws BlockPersistenceException {
@@ -108,7 +98,6 @@ public class LevelDBBlockPersistence implements BlockPersistence {
             block.serialize(buf);
             db.put(block.getBlock().getHash().getBytes(), buf.array());
             blockCache.put(block.getBlock().getHash(), block);
-            notFoundCache.remove(block.getBlock().getHash());
         } catch (IOException e) {
             throw new BlockPersistenceException(e);
         }
@@ -120,12 +109,8 @@ public class LevelDBBlockPersistence implements BlockPersistence {
         if (fromeMem != null) {
             return fromeMem;
         }
-        if (notFoundCache.contains(hash)) {
-            return null;
-        }
         byte[] bytes = db.get(hash.getBytes());
         if (bytes == null) {
-            notFoundCache.add(hash);
             return null;
         }
         StoredBlock blockFound = StoredBlock.deserialize(ByteBuffer.wrap(bytes));
@@ -146,7 +131,6 @@ public class LevelDBBlockPersistence implements BlockPersistence {
     @Override
     public synchronized void close() throws BlockPersistenceException {
         try {
-            notFoundCache.clear();
             blockCache.clear();
             db.close();
         } catch (IOException e) {
@@ -164,7 +148,6 @@ public class LevelDBBlockPersistence implements BlockPersistence {
     /** Erases the contents of the database (but NOT the underlying files themselves) and then reinitialises with the genesis block. */
     public synchronized void reset() throws BlockPersistenceException {
         blockCache.clear();
-        notFoundCache.clear();
         try {
             WriteBatch batch = db.createWriteBatch();
             try {
