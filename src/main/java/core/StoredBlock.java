@@ -8,6 +8,8 @@ import exception.BlockPersistenceException;
 import exception.ProtocolException;
 import exception.VerificationException;
 import net.NetworkParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import persistence.BlockPersistence;
 import utils.SpringContextUtil;
 
@@ -23,6 +25,7 @@ import java.nio.ByteBuffer;
  */
 public class StoredBlock implements Serializable {
     private static final long serialVersionUID = -2693437206206842414L;
+    private static final Logger logger = LoggerFactory.getLogger(StoredBlock.class);
     private static final int CHAIN_WORK_BYTES = 16; // 16 bytes for chainwork storage
     public static final int SIZE = 4 + CHAIN_WORK_BYTES + Block.BLOCK_HEAD_SIZE + SHA256Hash.SIZE; // 4 bytes for height
     private static final byte[] EMPTY_BYTES = new byte[CHAIN_WORK_BYTES];
@@ -159,6 +162,7 @@ public class StoredBlock implements Serializable {
             return prev.getnBits();
         }
 
+        logger.info("Changing difficulty.");
         StoredBlock cursor = source.get(prev.getHash());
         for (int i = 0; i < blocksInterval - 1; i++) {
             if (cursor == null) {
@@ -179,8 +183,11 @@ public class StoredBlock implements Serializable {
         newnBits = newnBits.multiply(BigInteger.valueOf(timespan));
         newnBits = newnBits.divide(BigInteger.valueOf(targetTimespan));
 
+        logger.info("New difficulty: {}", newnBits);
+
         if (newnBits.compareTo(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).proofOfWorkLimit) > 0) {
             newnBits = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).proofOfWorkLimit;
+            logger.info("New difficulty over limit, reset to {}", newnBits);
         }
 
         return Utils.encodeCompactBits(newnBits);
