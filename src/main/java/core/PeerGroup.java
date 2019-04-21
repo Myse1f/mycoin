@@ -53,7 +53,6 @@ public class PeerGroup {
         this.params = params;
         this.peers = Collections.synchronizedSet(new HashSet<>());
         this.peerEventListeners = new ArrayList<>();
-        this.peerPool = new ThreadPoolExecutor(DEAFAULT_CONNECTIONS, DEAFAULT_CONNECTIONS, THREAD_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1), new PeerThreadFactory());
 
         getDataListener = new AbstractPeerEventListener() {
             @Override
@@ -150,6 +149,7 @@ public class PeerGroup {
 
     public synchronized void start() throws IOException {
         if (!isRunning()) {
+            this.peerPool = new ThreadPoolExecutor(DEAFAULT_CONNECTIONS, DEAFAULT_CONNECTIONS, THREAD_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1), new PeerThreadFactory());
             this.peerGroupThread = new PeerGroupThread();
             this.running = true;
             this.peerGroupThread.start();
@@ -371,6 +371,7 @@ public class PeerGroup {
                         peers.remove(peer);
                     }
                 }
+                setDownloadPeer(null);
             }
         }
 
