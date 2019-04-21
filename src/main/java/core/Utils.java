@@ -315,6 +315,7 @@ public class Utils {
         json.put("prevHash", block.getBlock().getHashPrevBlock().toString());
         json.put("time", block.getBlock().getnTime());
         json.put("nonce", block.getBlock().getnNonce());
+        json.put("difficulty", block.getBlock().getnBits());
 
         return json;
     }
