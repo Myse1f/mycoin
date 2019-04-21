@@ -217,7 +217,11 @@ public class Peer {
         StoredBlock cursor = locatedBlock.getNextBlock(blockChain.getBlockPersistence());
         List<Inv> invs = new ArrayList<>();
         while(cursor != null && !cursor.getBlock().getHash().equals(hashStop)) {
-            invs.add(new Inv(Inv.InvType.MSG_BLOCK, cursor.getBlock().getHash())); //todo make a limit in case that requested blocks is too large
+            invs.add(new Inv(Inv.InvType.MSG_BLOCK, cursor.getBlock().getHash())); 
+            if (invs.size() >= 500) {
+                sendMessage(createInvMessage(invs)); // limit size if inv message
+                invs.clear();
+            }
             cursor = cursor.getNextBlock(blockChain.getBlockPersistence());
         }
         if (!invs.isEmpty()) {
