@@ -343,6 +343,8 @@ public class BlockChain {
      * If the block in the main chain
      */
     public boolean isMainBlock(SHA256Hash hash) throws BlockPersistenceException {
+        if (!hasBlock(hash))
+            return false;
         return !blockPersistence.get(hash).getNext().equals(SHA256Hash.ZERO_HASH);
     }
 }
