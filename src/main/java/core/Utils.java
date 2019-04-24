@@ -308,15 +308,16 @@ public class Utils {
     /**
      * convert a stored block to json object
      */
-    public static JSONObject storedBlock2Json(StoredBlock block) {
+    public static JSONObject storedBlock2Json(StoredBlock block, boolean profile) {
         JSONObject json = new JSONObject();
         json.put("hash", block.getBlock().getHash().toString());
         json.put("height", block.getHeight());
-        json.put("prevHash", block.getBlock().getHashPrevBlock().toString());
-        json.put("time", block.getBlock().getnTime());
-        json.put("nonce", block.getBlock().getnNonce());
-        json.put("difficulty", block.getBlock().getnBits());
-
+        if (!profile) {
+            json.put("prevHash", block.getBlock().getHashPrevBlock().toString());
+            json.put("time", block.getBlock().getnTime());
+            json.put("nonce", block.getBlock().getnNonce());
+            json.put("difficulty", block.getBlock().getnBits());
+        }
         return json;
     }
 

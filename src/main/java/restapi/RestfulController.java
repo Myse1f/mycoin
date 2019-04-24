@@ -47,7 +47,7 @@ public class RestfulController {
         try {
             StoredBlock block = chain.getBlockPersistence().get(new SHA256Hash(hash));
             if (block != null) {
-                JSONObject data = Utils.storedBlock2Json(block);
+                JSONObject data = Utils.storedBlock2Json(block, false);
                 result.setCode(Result.ResultCode.SUCCESS.getCode());
                 result.setMessage(Result.ResultCode.SUCCESS.getErrMsg());
                 result.setData(data);
@@ -73,13 +73,38 @@ public class RestfulController {
         try {
             StoredBlock cursor = chain.getChainTip();
             for (int i = 0; i < 10 && cursor != null; i++) {
-                JSONObject jsonObject = Utils.storedBlock2Json(cursor);
+                JSONObject jsonObject = Utils.storedBlock2Json(cursor, false);
                 jsonArray.add(jsonObject);
                 cursor = cursor.getPreviousBlock(chain.getBlockPersistence());
             }
             result.setCode(Result.ResultCode.SUCCESS.getCode());
             result.setMessage(Result.ResultCode.SUCCESS.getErrMsg());
             result.setData(jsonArray);
+        } catch (BlockPersistenceException e) {
+            logger.error("Database has some problem when request for recent blocks. {}", e);
+            result.setCode(Result.ResultCode.EXCEPTION.getCode());
+            result.setMessage(Result.ResultCode.EXCEPTION.getErrMsg());
+        }
+
+        return result;
+    }
+
+    @GetMapping("/allblocks")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "获得所有的区块信息", notes = "区块信息只包含高度和哈希值")
+    public Result getAllBlocks() {
+        Result result = new Result();
+        JSONArray data = new JSONArray();
+
+        try {
+
+            for (StoredBlock cursor = chain.getChainTip(); cursor != null; cursor = cursor.getPreviousBlock(chain.getBlockPersistence())) {
+                JSONObject jsonObject = Utils.storedBlock2Json(cursor, true);
+                data.add(jsonObject);
+            }
+            result.setCode(Result.ResultCode.SUCCESS.getCode());
+            result.setMessage(Result.ResultCode.SUCCESS.getErrMsg());
+            result.setData(data);
         } catch (BlockPersistenceException e) {
             logger.error("Database has some problem when request for recent blocks. {}", e);
             result.setCode(Result.ResultCode.EXCEPTION.getCode());
