@@ -134,7 +134,7 @@ public class RestfulController {
     @PatchMapping("/peer")
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "连接节点", notes = "连接其他节点")
-    public Result connectPeer(@RequestParam(value = "adress") String address, @RequestParam(value = "port", defaultValue = "23333") int port) {
+    public Result connectPeer(@RequestParam(value = "address") String address, @RequestParam(value = "port", defaultValue = "23333") int port) {
         Result result = new Result();
 
         try {
