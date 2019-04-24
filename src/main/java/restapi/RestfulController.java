@@ -23,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/mycoin/api")
+@CrossOrigin
 public class RestfulController {
     private static final Logger logger = LoggerFactory.getLogger(RestfulController.class);
 
@@ -42,6 +43,7 @@ public class RestfulController {
     @GetMapping("/block/{hash}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "获取区块信息", notes = "根据hash获取区块信息")
+    @CrossOrigin
     public Result getBlock(@PathVariable("hash") String hash) {
         Result result = new Result();
         try {
@@ -67,6 +69,7 @@ public class RestfulController {
     @GetMapping("/recentblocks")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "获取最近的区块", notes = "获取最近的至多10个区块信息")
+    @CrossOrigin
     public Result getRecentBlocks() {
         Result result = new Result();
         JSONArray jsonArray = new JSONArray();
@@ -92,6 +95,7 @@ public class RestfulController {
     @GetMapping("/allblocks")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "获得所有的区块信息", notes = "区块信息只包含高度和哈希值")
+    @CrossOrigin
     public Result getAllBlocks() {
         Result result = new Result();
         JSONArray data = new JSONArray();
@@ -117,6 +121,7 @@ public class RestfulController {
     @GetMapping("/peers")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "获取临接节点", notes = "获取所有临接节点")
+    @CrossOrigin
     public Result getPeers() {
         Result result = new Result();
         JSONArray jsonArray = new JSONArray();
@@ -134,6 +139,7 @@ public class RestfulController {
     @PatchMapping("/peer")
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "连接节点", notes = "连接其他节点")
+    @CrossOrigin
     public Result connectPeer(@RequestParam(value = "address") String address, @RequestParam(value = "port", defaultValue = "23333") int port) {
         Result result = new Result();
 
@@ -155,6 +161,7 @@ public class RestfulController {
     @GetMapping("/miner")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "获得矿工状态", notes = "获得矿工状态")
+    @CrossOrigin
     public Result getMinerStatus() {
         Result result = new Result();
         JSONObject data = new JSONObject();
@@ -174,6 +181,7 @@ public class RestfulController {
     @PatchMapping("/miner")
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "启动矿工", notes = "启动矿工工作")
+    @CrossOrigin
     public Result startMiner() {
         Result result = new Result();
 
@@ -194,6 +202,7 @@ public class RestfulController {
     @DeleteMapping("/miner")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "关闭矿工", notes = "停止矿工工作")
+    @CrossOrigin
     public Result stopMiner() {
         Result result = new Result();
 
@@ -214,6 +223,7 @@ public class RestfulController {
     @GetMapping("/network")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "获得网络状态", notes = "获得网络状态")
+    @CrossOrigin
     public Result getNetworkStatus() {
         Result result = new Result();
         JSONObject data = new JSONObject();
@@ -234,6 +244,7 @@ public class RestfulController {
     @PatchMapping("/network")
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "启动网络", notes = "启动网络")
+    @CrossOrigin
     public Result startNetwork() {
         Result result = new Result();
         JSONObject data = new JSONObject();
@@ -260,6 +271,7 @@ public class RestfulController {
     @DeleteMapping("/network")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "停止网络", notes = "停止网络")
+    @CrossOrigin
     public Result stopNetwork() {
         Result result = new Result();
         JSONObject data = new JSONObject();

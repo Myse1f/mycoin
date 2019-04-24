@@ -17,13 +17,11 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.io.IOException;
-
 @SpringBootApplication(scanBasePackages = {"core", "utils", "restapi", "persistence"})
 @EnableSwagger2
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
     }
 
