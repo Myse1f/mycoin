@@ -76,7 +76,7 @@ public class RestfulController {
         try {
             StoredBlock cursor = chain.getChainTip();
             for (int i = 0; i < 10 && cursor != null; i++) {
-                JSONObject jsonObject = Utils.storedBlock2Json(cursor, false);
+                JSONObject jsonObject = Utils.storedBlock2Json(cursor, true);
                 jsonArray.add(jsonObject);
                 cursor = cursor.getPreviousBlock(chain.getBlockPersistence());
             }

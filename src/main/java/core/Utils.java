@@ -312,9 +312,9 @@ public class Utils {
         JSONObject json = new JSONObject();
         json.put("hash", block.getBlock().getHash().toString());
         json.put("height", block.getHeight());
+        json.put("time", block.getBlock().getnTime());
         if (!profile) {
             json.put("prevHash", block.getBlock().getHashPrevBlock().toString());
-            json.put("time", block.getBlock().getnTime());
             json.put("nonce", block.getBlock().getnNonce());
             json.put("difficulty", block.getBlock().getnBits());
         }
