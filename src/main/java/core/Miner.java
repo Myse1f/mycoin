@@ -41,19 +41,23 @@ public class Miner {
      * start solving puzzle, launch mining thread
      */
     public synchronized void run() {
-        this.working = true;
-        this.miner = new MinerThread();
-        miner.start();
-        logger.info("Start mining block");
+        if (!isWorking()) {
+            this.working = true;
+            this.miner = new MinerThread();
+            miner.start();
+            logger.info("Start mining block");
+        }
     }
 
     /**
      * stop mining, interrupt the thread
      */
     public synchronized void stop() {
-        this.working = false;
-        this.miner = null; // finalize the miner
-        logger.info("Stop mining block.");
+        if (isWorking()) {
+            this.working = false;
+            this.miner = null; // finalize the miner
+            logger.info("Stop mining block.");
+        }
     }
 
     public synchronized boolean isWorking() {
