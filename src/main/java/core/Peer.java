@@ -155,11 +155,12 @@ public class Peer {
     private void processVersionMessage(Message msg) throws IOException, ClassNotFoundException {
         logger.debug("Received version message.");
         versionHeight = msg.getPayloadAsInteger();
-        sendMessage(createVerbackMessage());
         // this connection is inbound, need to send a version message back
         if (inBound) {
             sendMessage(createVersionMessage());
         }
+        sendMessage(createVerbackMessage());
+
     }
 
     private void processVerbackMessage() {
