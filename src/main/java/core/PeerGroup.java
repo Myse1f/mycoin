@@ -364,6 +364,13 @@ public class PeerGroup {
             // close all peer connection
             synchronized (PeerGroup.this) {
                 running = false;
+                if (!serverSocket.isClosed()) {
+                    try {
+                        shutdown();
+                    } catch (IOException e) {
+                        logger.error("Error when closing server socket.");
+                    }
+                }
                 peerPool.shutdown();
                 synchronized (peers) {
                     for (Peer peer : peers) {
