@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.BlockPersistence;
 import utils.EventListenerInvoker;
-import utils.SpringContextUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,6 +39,7 @@ public class Peer {
     private boolean running;
     private PeerAddress address;
     private final BlockChain blockChain;
+    private final NetworkParameters params;
 
     private Set<Inv> invKonwn = new HashSet<>();
     private List<PeerEventListener> eventListeners;
@@ -50,9 +50,10 @@ public class Peer {
     /**
      * construct a peer that uses peer address, then call connect() to connect to it
      */
-    public Peer(PeerAddress address, BlockChain blockChain) {
+    public Peer(PeerAddress address, BlockChain blockChain, NetworkParameters params) {
         this.blockChain = blockChain;
         this.address = address;
+        this.params = params;
         this.inBound = false; // this construction means this connection is outBound
         eventListeners = new ArrayList<>();
     }
@@ -60,8 +61,8 @@ public class Peer {
     /**
      * Construct a peer that uses the given, already connected network connection object.
      */
-    public Peer(BlockChain blockChain, NetworkConnection connection) {
-        this(null, blockChain);
+    public Peer(BlockChain blockChain, NetworkConnection connection, NetworkParameters params) {
+        this(null, blockChain, params);
         this.connection = connection;
         this.inBound = true; // this construction means this connection is inBound
         this.address = connection.getPeerAddress();
@@ -91,7 +92,7 @@ public class Peer {
 
     public void connect() throws PeerException {
         try {
-            connection = new TCPNetworkConnection(address, CONNECT_TIMEOUT_MSEC, createVersionMessage());
+            connection = new TCPNetworkConnection(address, CONNECT_TIMEOUT_MSEC, createVersionMessage(), params);
         } catch (IOException e) {
             throw new PeerException(e);
         }
@@ -346,7 +347,7 @@ public class Peer {
             }
         }
         if (cursor != null) {
-            blockLocator.add(((NetworkParameters)(SpringContextUtil.getBean("network_params"))).genesisBlock.getHash());
+            blockLocator.add(params.genesisBlock.getHash());
         }
 
         Message getBlocksMessage = createGetBlocksMessage(blockLocator, hashStop);

@@ -12,10 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import persistence.BlockPersistence;
-import utils.SpringContextUtil;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A BlockChain holds a series of {@link Block} objects, links them together, and knows how to verify that the
@@ -139,7 +141,7 @@ public class BlockChain {
     private void checkDifficultAdaption(StoredBlock prevBlock, StoredBlock newBlock) throws VerificationException, BlockPersistenceException {
         Block prev = prevBlock.getBlock();
         Block current = newBlock.getBlock();
-        int blocksInterval = ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).interval;
+        int blocksInterval = params.interval;
         // check interval
         if ((prevBlock.getHeight() + 1) % blocksInterval != 0) {
             // don't change difficulty, check consistency

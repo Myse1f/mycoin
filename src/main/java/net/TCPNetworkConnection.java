@@ -8,9 +8,6 @@ import core.Message;
 import exception.ProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import utils.SpringContextUtil;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -41,17 +38,20 @@ public class TCPNetworkConnection implements NetworkConnection {
     }
 
     /**
-     * Connect to a given IP address and do the version handshake | version -> | |
-     * <- verback | | <- version | | verback -> |
+     * Connect to a given IP address and do the version handshake
+     * | version -> |
+     * | <- version |
+     * | <- verback |
+     * | verback -> |
      * 
      * @param peerAddress
      * @param connectTimeoutMsec
      * @throws IOException
      */
-    public TCPNetworkConnection(PeerAddress peerAddress, int connectTimeoutMsec, Message versionMessage)
+    public TCPNetworkConnection(PeerAddress peerAddress, int connectTimeoutMsec, Message versionMessage, NetworkParameters params)
             throws IOException {
         this.peer = peerAddress;
-        int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : ((NetworkParameters)(SpringContextUtil.getBean("network_params"))).port;
+        int port = (peerAddress.getPort() > 0) ? peerAddress.getPort() : params.port;
         InetSocketAddress address = new InetSocketAddress(peer.getAddr(), port);
         socket = new Socket();
         socket.connect(address, connectTimeoutMsec);
@@ -77,8 +77,8 @@ public class TCPNetworkConnection implements NetworkConnection {
 //        logger.info("Connect to peer: {}", peerAddress);
     }
 
-    public TCPNetworkConnection(InetAddress address, int connectTimeoutMsec, Message versionMessage) throws IOException, ProtocolException {
-        this(new PeerAddress(address), connectTimeoutMsec, versionMessage);
+    public TCPNetworkConnection(InetAddress address, int connectTimeoutMsec, Message versionMessage, NetworkParameters params) throws IOException {
+        this(new PeerAddress(address), connectTimeoutMsec, versionMessage, params);
     }
 
     @Override

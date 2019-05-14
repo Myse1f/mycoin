@@ -144,7 +144,7 @@ public class RestfulController {
         Result result = new Result();
 
         try {
-            Peer peer = new Peer(new PeerAddress(InetAddress.getByName(address), port), chain);
+            Peer peer = new Peer(new PeerAddress(InetAddress.getByName(address), port), chain, network.getParams());
             network.addPeer(peer);
             result.setCode(Result.ResultCode.SUCCESS.getCode());
             result.setMessage(Result.ResultCode.SUCCESS.getErrMsg());

@@ -335,6 +335,10 @@ public class PeerGroup {
         }
     }
 
+    public NetworkParameters getParams() {
+        return params;
+    }
+
     /**
      * peer group thread for listening socket and wait for peers to connect
      */
@@ -354,7 +358,7 @@ public class PeerGroup {
             try {
                 while (isRunning()) {
                     Socket socket = serverSocket.accept(); // block here to wait for a new inbound connection
-                    Peer peer = new Peer(blockchain, new TCPNetworkConnection(socket));
+                    Peer peer = new Peer(blockchain, new TCPNetworkConnection(socket), params);
                     runNewPeer(peer, false);
                 }
             } catch (IOException e) {

@@ -7,12 +7,11 @@ package core;
 import exception.VerificationException;
 import net.NetworkParameters;
 import org.junit.Test;
-import utils.SpringContextUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 
 public class BlockTest {
