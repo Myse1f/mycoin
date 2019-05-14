@@ -61,19 +61,7 @@ public class PeerGroup {
             }
         };
 
-        downloadListener = new DownloadListener() {
-            @Override
-            public void onBlockDownloaded(Peer peer, Block block, int blocksLeft) {
-                super.onBlockDownloaded(peer, block, blocksLeft);
-                // broadcast block inv to all peers
-                Inv blockInv = new Inv(Inv.InvType.MSG_BLOCK, block.getHash());
-                try {
-                    brocastBlcokInv(blockInv);
-                } catch (IOException e) {
-                    logger.error("Fail to broadcast Block Inv {}", blockInv);
-                }
-            }
-        };
+        downloadListener = new DownloadListener();
 
         start();
         initialBlocksDownload();
@@ -320,6 +308,18 @@ public class PeerGroup {
     private synchronized void handleNewPeer(Peer peer) {
         logger.info("Handling new peer {}", peer);
         peer.addEventListener(getDataListener);
+        peer.addEventListener(new AbstractPeerEventListener() {
+            @Override
+            public void onBlockDownloaded(Peer peer, Block block, int left) {
+                // broadcast block inv to all peers
+                Inv blockInv = new Inv(Inv.InvType.MSG_BLOCK, block.getHash());
+                try {
+                    brocastBlcokInv(blockInv);
+                } catch (IOException e) {
+                    logger.error("Fail to broadcast Block Inv {}", blockInv);
+                }
+            }
+        });
         EventListenerInvoker.invoke(peerEventListeners, new EventListenerInvoker<PeerEventListener>() {
             @Override
             public void invoke(PeerEventListener listener) {
