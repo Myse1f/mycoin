@@ -140,6 +140,24 @@ public class LevelDBBlockPersistence implements BlockPersistence {
 
     /** Below for test */
 
+    public LevelDBBlockPersistence(NetworkParameters params, File file) throws BlockPersistenceException {
+        this.params = params;
+        DBFactory dbFactory = JniDBFactory.factory;
+        Options options = new Options();
+        options.createIfMissing();
+
+        try {
+            tryOpen(file, dbFactory, options);
+        } catch (IOException | VerificationException e) {
+            try {
+                dbFactory.repair(file, options);
+                tryOpen(file, dbFactory, options);
+            } catch (IOException | VerificationException e1) {
+                throw new BlockPersistenceException(e1);
+            }
+        }
+    }
+
     /** destroy the db file */
     public synchronized void destroy() throws IOException {
         JniDBFactory.factory.destroy(path, new Options());
