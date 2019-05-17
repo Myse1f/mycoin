@@ -23,7 +23,6 @@ public final class SHA256Hash implements Serializable {
     public static final SHA256Hash ZERO_HASH = new SHA256Hash(new byte[32]);
 
     private byte[] bytes;
-    private transient int hash = -1;
 
     /**
      * Construct a {@link SHA256Hash} with 32 length bytes array
@@ -33,13 +32,6 @@ public final class SHA256Hash implements Serializable {
         assert bytes.length == 32;
         this.bytes = bytes;
     }
-
-    private SHA256Hash(byte[] bytes, int hash) {
-        assert bytes.length == 32;
-        this.bytes = bytes;
-        this.hash = hash;
-    }
-
     /**
      * Construct a {@link SHA256Hash} with a hex string (length 64)
      * @param hash
@@ -79,11 +71,9 @@ public final class SHA256Hash implements Serializable {
 
     @Override
     public int hashCode() {
-        if (hash == -1) {
-            hash = 1;
-            for (int i = 0; i < HASHCODE_BYTES_TO_CHECK; i++)
-                hash = 31 * hash + bytes[i];
-        }
+        int hash = 1;
+        for (int i = 0; i < HASHCODE_BYTES_TO_CHECK; i++)
+            hash = 31 * hash + bytes[i];
         return hash;
     }
 
@@ -99,6 +89,6 @@ public final class SHA256Hash implements Serializable {
     }
 
     public SHA256Hash duplicate() {
-        return new SHA256Hash(bytes, hash);
+        return new SHA256Hash(bytes);
     }
 }
