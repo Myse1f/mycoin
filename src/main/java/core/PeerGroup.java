@@ -243,7 +243,7 @@ public class PeerGroup {
     /**
      * broadcast block Inv to all peers
      */
-    public void brocastBlcokInv(Inv blockInv) throws IOException {
+    public void broadcastBlockInv(Inv blockInv) throws IOException {
         if (!isRunning()) {
             logger.info("PeerGroup is not working. Thus not broadcast block inv.");
             return;
@@ -314,7 +314,7 @@ public class PeerGroup {
                 // broadcast block inv to all peers
                 Inv blockInv = new Inv(Inv.InvType.MSG_BLOCK, block.getHash());
                 try {
-                    brocastBlcokInv(blockInv);
+                    broadcastBlockInv(blockInv);
                 } catch (IOException e) {
                     logger.error("Fail to broadcast Block Inv {}", blockInv);
                 }

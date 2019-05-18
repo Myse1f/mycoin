@@ -72,7 +72,7 @@ public class Miner {
         logger.info("New block is mined: {}", block);
         try {
             blockChain.add(block);
-            peerGroup.brocastBlcokInv(new Inv(Inv.InvType.MSG_BLOCK, block.getHash()));
+            peerGroup.broadcastBlockInv(new Inv(Inv.InvType.MSG_BLOCK, block.getHash()));
         } catch (VerificationException e) {
             // impossible, thus the block is mined after verification
             throw new RuntimeException(e);
